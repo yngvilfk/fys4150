@@ -20,7 +20,8 @@ namespace
    {
       void jacobi(arma::Mat<double>& A,
                   arma::Mat<double>& B,
-                  const int&         n);
+                  const int&         n,
+                  arma::Col<double>& eigval);
 
       double maxOffDiag(arma::Mat<double>& A,
                       int&                     k,
@@ -28,16 +29,17 @@ namespace
                       const int&               n);
 
       void rotate(arma::Mat<double>& A,
-                  arma::Mat<double>& B,
                   int&         k,
                   int&         l,
                   const int&         n);
       void writeMatlabVec(std::ofstream& write,
                        arma::Col<double>&,
-                       const std::string& name);
+                       const std::string& name,
+                          const int& n);
       void writeMatlabMat(std::ofstream& write,
                        arma::Mat<double>&,
-                       const std::string& name);
+                       const std::string& name,
+                          const int& n);
    }
 }
 
@@ -47,15 +49,14 @@ int main()
 {
    int number = 1; //one(1) or two(2) electron system
    int method = 1; //armadillosystem(1) or jacobifunction(0)
-
+   const int nsteps =10;
+   const double rhoMaks = 5.;
 
    double V = 0.;
    double d= 0.;
-   const double rhoMaks = 10.;
-   const int nsteps =50;
    const int n = nsteps-1;
    const int rhoMin = 0.;
-   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps);
+   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps+1);
    std::cout << h << std::endl;
    const double e = -1./(h*h);
    std::cout << "e: " << e << std::endl;
@@ -64,10 +65,12 @@ int main()
 
    arma::Mat<double> A(n,n), B(n,n);
    A.zeros();
-   //fill matrix A
-   if (number == 1)
-   {
 
+
+   //fill matrix A
+
+   if (number == 1)   //look at one electron
+   {
       //first row:
       rho(1) = rhoMin + h;
       V = rho(1)*rho(1);
@@ -92,7 +95,10 @@ int main()
          A(i,i-1) = e;
       }
    }
-   else
+
+
+
+   else   //look at a system of two electron
    {
       double omega = 0.01;
       //first row:
@@ -122,44 +128,64 @@ int main()
    std::cout << "n_steps: " << nsteps  << ", rho_max: " << rhoMaks << std::endl;
 
 
+
    if (method == 0)
    {
-      Local::jacobi(A,B,n);
-      for (int i = 0; i<16 ; ++i)
-      {
-         cout << A(i,i) << endl;
-      }
-      cout << "min: " << min(A.diag()) << endl;
+      //method is the local "jacobi" method
+      arma::Col<double> eigval;
+      Local::jacobi(A,B,n,eigval);
+
+      cout << "lamda1 " << eigval(0) << endl;
+      cout << "lamda2 " << eigval(1) << endl;
+      cout << "lamda3 " << eigval(2) << endl;
    }
 
 
    else if (method == 1)
    {
+       //method is the armadillo "eig_sum" function
+
       vec eigval;
       arma::Mat<double> eigvec;
       eig_sym(eigval, eigvec, A);
-      std::cout << "eigval: " << eigval(0) << std::endl;
-      std::cout << "eigval: " << eigval(1) << std::endl;
-      std::cout << "eigval: " << eigval(2) << std::endl;
-      //std::cout << "eigvec: " << eigvec << std::endl;
+      arma::Col<double> psi(n) ;
+      for (int i = 0; i<n ; ++i)
+      {
+          double sum = 0.;
+          for (int j = 0; j<n ; ++j)
+          {
+              sum += fabs(eigvec(j,i));
+          }
+          psi(i) = sum;
+      }
+      arma::Col<double> u(n) ;
+      u = norm(psi);
+
+
+      std::cout << "eigvec: " << eigvec << std::endl;
+      std::cout << "psi: " << psi << std::endl;
 
       std::string fileName("test.m");
       std::ofstream write(fileName.c_str());
       //write to file for plotting
       const std::string fileName_val("eigval");
-      Local::writeMatlabVec(write, eigval, fileName_val);
+      Local::writeMatlabVec(write, eigval, fileName_val,n);
       const std::string fileName_vec("eigvec");
-      Local::writeMatlabMat(write, eigvec, fileName_vec);
+      Local::writeMatlabMat(write, eigvec, fileName_vec,n);
       write.close();
+      std::cout << eigvec << std::endl;
    }
 
 }
 
 
+
+
 void
 Local::jacobi(arma::Mat<double>& A,
               arma::Mat<double>& B,
-              const int& n)
+              const int& n,
+              arma::Col<double>& eigval)
 {
    //setting up eigenvector-matrix:
    B.eye();
@@ -171,13 +197,13 @@ Local::jacobi(arma::Mat<double>& A,
    int iterations = 0;
    while ( aMax > epsilon && iterations < maxIterations)
    {
-      rotate(A, B, k, l, n);
+      rotate(A, k, l, n);
       aMax = maxOffDiag(A, k, l, n);
       //std::cout << "Amaks: " << aMax << std::endl;
       ++ iterations;
    }
    std::cout << "number of iterations needed: " << iterations << std::endl;
-
+   eigval = sort(A.diag());
    return;
 }
 
@@ -197,28 +223,32 @@ Local::maxOffDiag(arma::Mat<double>& A,
          if (fabs(A(i,j)) > max)
          {
             max = fabs(A(i,j));
-            k = i;
-            l = j;
+            l = i;
+            k = j;
          }
 
       }
    }
-   //std::cout << "maks: " << max << std::endl;
 
    return max;
 }
 
 
 
-/*
+
 void
 Local::rotate(mat& A,
-            mat& B,
             int& k,
             int& l,
             const int& n)
 {
-      //std::cout << "rotate" << std::endl;
+    /*
+     perform one rotation of the matrix and sets A(k,l)=A(l,k)=0
+     A -- symmetric input matrix
+     k -- index (line) of max element of A
+     l -- index (coloumn) of max element of A
+     n -- dimension of matrix A
+     */
 double c, s;
    if(A(k,l) != 0.0)
    {
@@ -226,12 +256,10 @@ double c, s;
       double tau = (A(l,l)-A(k,k))/(2*A(k,l));
       if (tau < 0.0)
       {
-            //t = -tau - sqrt(1. + tau*tau);
             t = -1./(-tau + sqrt(1. + tau*tau) );
       }
       else
       {
-         //t = -tau + sqrt(1. + tau*tau);
          t = 1./(tau +sqrt(1. + tau*tau) );
       }
       c = 1.0/(sqrt(1.0 + t*t));
@@ -268,17 +296,18 @@ double c, s;
 
    }
 }
-*/
 
 
 
+/*
 void
 Local::rotate(mat& A,
-            mat& B,
-            int& k,
-            int& l,
-            const int& n)
+              mat& B,
+              int& k,
+              int& l,
+              const int& n)
 {
+
 double c, s;
    if(A(k,l) != 0.0)
    {
@@ -309,17 +338,19 @@ double c, s;
    S(l,l) = c;
    S(k,l) = -s;
    S(l,k) = s;
-   B = S.t()*A*S;
+   B = S*A*S.t();
    A = B;
+   std::cout << "A(k,l): " << A(k,l) << "A(l,k): " << A(l,k) << std::endl;
 }
-
+*/
 void
 Local::writeMatlabVec(std::ofstream& write,
-                   arma::Col<double>& vec,
-                   const std::string& name)
+                      arma::Col<double>& vec,
+                      const std::string& name,
+                      const int& n)
 {
    write << name << " = [" << "\n";
-   for (std::size_t iVec = 0; iVec < vec.size(); ++iVec)
+   for (int iVec = 0; iVec < n; ++iVec)
    {
       write << vec(iVec) << "\n";
    }
@@ -330,13 +361,25 @@ Local::writeMatlabVec(std::ofstream& write,
 
 void
 Local::writeMatlabMat(std::ofstream& write,
-                   arma::Mat<double>& mat,
-                   const std::string& name)
+                      arma::Mat<double>& mat,
+                      const std::string& name,
+                      const int& n)
 {
    write << name << " = [" << "\n";
-   for (std::size_t iVec = 0; iVec < mat.size(); ++iVec)
+   for (int iVec = 0; iVec < n; ++iVec)
    {
-      write << mat(iVec) << "\n";
+       for (int jVec = 0; jVec < n; ++jVec)
+       {
+           if (jVec < n-1)
+           {
+               write << mat(iVec,jVec) << " ";
+           }
+           else
+           {
+               write << mat(iVec,jVec) << "\n";
+           }
+       }
+
    }
 
    write << "]" << "\n\n";
