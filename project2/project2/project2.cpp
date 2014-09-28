@@ -29,6 +29,7 @@ namespace
                       const int&               n);
 
       void rotate(arma::Mat<double>& A,
+                  arma::Mat<double>& B,
                   int&         k,
                   int&         l,
                   const int&         n);
@@ -40,6 +41,11 @@ namespace
                        arma::Mat<double>&,
                        const std::string& name,
                           const int& n);
+      void integral(const double rhoMin,
+                       const double rhoMaks,
+                       const int n,
+                       double& u_i,
+                       const arma::Col<double>& v);
    }
 }
 
@@ -47,21 +53,23 @@ namespace
 
 int main()
 {
-   int number = 1; //one(1) or two(2) electron system
-   int method = 1; //armadillosystem(1) or jacobifunction(0)
-   const int nsteps =10;
-   const double rhoMaks = 5.;
+   int number = 2; //one(1) or two(2) electron system
+   int method = 0; //armadillosystem(1) or jacobifunction(0)
+   const int nsteps =100;
+   const double rhoMaks = 20.;
 
    double V = 0.;
    double d= 0.;
    const int n = nsteps-1;
-   const int rhoMin = 0.;
-   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps+1);
+   const double rhoMin = 0.;
+   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps-1);
    std::cout << h << std::endl;
    const double e = -1./(h*h);
    std::cout << "e: " << e << std::endl;
-   arma::Col<double> rho(n+1);
+   arma::Col<double> rho(n+2);
    rho.zeros();
+   rho(0) = rhoMin;
+   rho(n+1)=rhoMaks;
 
    arma::Mat<double> A(n,n), B(n,n);
    A.zeros();
@@ -100,7 +108,7 @@ int main()
 
    else   //look at a system of two electron
    {
-      double omega = 0.01;
+      double omega = 5.;
       //first row:
       rho(1) = rhoMin + h;
       V = rho(1)*rho(1)*omega*omega + 1/rho(1);
@@ -134,6 +142,27 @@ int main()
       //method is the local "jacobi" method
       arma::Col<double> eigval;
       Local::jacobi(A,B,n,eigval);
+      arma::Mat<double> eigvec = B;
+
+      arma::Col<double> u(n+2);
+      u(0) = 0.;
+      u(n+1) = 0.;
+
+      for ( int i= 1; i<=n ; ++i)
+      {
+         arma::Col<double> v=eigvec.col(i-1);
+         //std::cout << "eigvec colonne: " << v << std::endl;
+         Local::integral(rhoMin, rhoMaks, n, u(i),v);
+      }
+      //std::cout << "eigvec: " << eigvec << std::endl;
+      std::string fileName("test.m");
+      std::ofstream write(fileName.c_str());
+      //write to file for plotting
+      const std::string fileName_val("rho");
+      Local::writeMatlabVec(write, rho, fileName_val,n);
+      const std::string fileName_vec("u");
+      Local::writeMatlabVec(write, u, fileName_vec,n);
+      write.close();
 
       cout << "lamda1 " << eigval(0) << endl;
       cout << "lamda2 " << eigval(1) << endl;
@@ -148,32 +177,30 @@ int main()
       vec eigval;
       arma::Mat<double> eigvec;
       eig_sym(eigval, eigvec, A);
-      arma::Col<double> psi(n) ;
-      for (int i = 0; i<n ; ++i)
+      //std::cout << "eigval: " << eigval << std::endl;
+
+
+      //std::cout << "eigvec: " << eigvec << std::endl;
+
+      arma::Col<double> u(n+2);
+      u(0) = 0.;
+      u(n+1) = 0.;
+
+      for ( int i= 1; i<=n ; ++i)
       {
-          double sum = 0.;
-          for (int j = 0; j<n ; ++j)
-          {
-              sum += fabs(eigvec(j,i));
-          }
-          psi(i) = sum;
+         arma::Col<double> v=eigvec.col(i-1);
+         //std::cout << "eigvec colonne: " << v << std::endl;
+         Local::integral(rhoMin, rhoMaks, n, u(i),v);
       }
-      arma::Col<double> u(n) ;
-      u = norm(psi);
-
-
-      std::cout << "eigvec: " << eigvec << std::endl;
-      std::cout << "psi: " << psi << std::endl;
-
+      //std::cout << "eigvec: " << eigvec << std::endl;
       std::string fileName("test.m");
       std::ofstream write(fileName.c_str());
       //write to file for plotting
-      const std::string fileName_val("eigval");
-      Local::writeMatlabVec(write, eigval, fileName_val,n);
-      const std::string fileName_vec("eigvec");
-      Local::writeMatlabMat(write, eigvec, fileName_vec,n);
+      const std::string fileName_val("rho");
+      Local::writeMatlabVec(write, rho, fileName_val,n);
+      const std::string fileName_vec("u");
+      Local::writeMatlabVec(write, u, fileName_vec,n);
       write.close();
-      std::cout << eigvec << std::endl;
    }
 
 }
@@ -197,13 +224,14 @@ Local::jacobi(arma::Mat<double>& A,
    int iterations = 0;
    while ( aMax > epsilon && iterations < maxIterations)
    {
-      rotate(A, k, l, n);
+      rotate(A, B,k, l, n);
       aMax = maxOffDiag(A, k, l, n);
       //std::cout << "Amaks: " << aMax << std::endl;
       ++ iterations;
    }
    std::cout << "number of iterations needed: " << iterations << std::endl;
-   eigval = sort(A.diag());
+   //eigval = sort(A.diag());
+   eigval = A.diag();
    return;
 }
 
@@ -238,6 +266,7 @@ Local::maxOffDiag(arma::Mat<double>& A,
 
 void
 Local::rotate(mat& A,
+              mat& B,
             int& k,
             int& l,
             const int& n)
@@ -271,7 +300,7 @@ double c, s;
       s = 0.0;
    }
 
-   double a_kk, a_ll, a_ik, a_il;
+   double a_kk, a_ll, a_ik, a_il, b_ik, b_il;
    a_kk = A(k,k);
    a_ll = A(l,l);
    A(k,k) = c*c*a_kk - 2.0*c*s*A(k,l) + s*s*a_ll;
@@ -289,10 +318,10 @@ double c, s;
          A(i,l) = c*a_il + s*a_ik;
          A(l,i) = A(i,l);
       }
-//      b_ik = B(i,k);
-//      b_il = B(i,l);
-//      B(i,k) = c*b_ik - s*b_il;
-//      B(i,l) = c*b_il + s*b_ik;
+      b_ik = B(i,k);
+      b_il = B(i,l);
+      B(i,k) = c*b_ik - s*b_il;
+      B(i,l) = c*b_il + s*b_ik;
 
    }
 }
@@ -383,4 +412,19 @@ Local::writeMatlabMat(std::ofstream& write,
    }
 
    write << "]" << "\n\n";
+}
+
+void
+Local::integral(const double rhoMin,
+                   const double rhoMaks,
+                   const int n,
+                   double& u_i,
+                   const arma::Col<double>& v)
+{
+   double step = (rhoMaks-rhoMin)/static_cast<double>(n+2);
+   for ( int j = 0 ; j<n ; ++j)
+   {
+      u_i += v(j)*v(j);
+   }
+u_i = u_i*step;
 }
