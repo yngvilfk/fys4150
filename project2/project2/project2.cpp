@@ -33,19 +33,23 @@ namespace
                   int&         k,
                   int&         l,
                   const int&         n);
+
       void writeMatlabVec(std::ofstream& write,
-                       arma::Col<double>&,
+                       const arma::Col<double>&,
                        const std::string& name,
                           const int& n);
+
       void writeMatlabMat(std::ofstream& write,
                        arma::Mat<double>&,
                        const std::string& name,
                           const int& n);
-      void integral(const double rhoMin,
-                       const double rhoMaks,
-                       const int n,
-                       double& u_i,
-                       const arma::Col<double>& v);
+
+      void plot(const arma::Mat<double>&   eigvec,
+                const arma::Col<double>&   rho,
+                const std::string&         fileName,
+                const int&                 n,
+                const int&                 lambda);
+
    }
 }
 
@@ -53,10 +57,14 @@ namespace
 
 int main()
 {
-   int number = 2; //one(1) or two(2) electron system
+   int number = 1; //one(1) or two(2) electron system
    int method = 0; //armadillosystem(1) or jacobifunction(0)
-   const int nsteps =100;
-   const double rhoMaks = 20.;
+   const int nsteps =500;
+   const double rhoMaks = 5.0 ;
+   int lambda = 1; //select eigenvalue: lambda 1(1), lambda 2(2) etc
+   const std::string fileName("omega5_1.m");
+   double omega = 0.01;
+
 
    double V = 0.;
    double d= 0.;
@@ -73,7 +81,7 @@ int main()
 
    arma::Mat<double> A(n,n), B(n,n);
    A.zeros();
-
+   clock_t start, finish;
 
    //fill matrix A
 
@@ -108,10 +116,9 @@ int main()
 
    else   //look at a system of two electron
    {
-      double omega = 5.;
       //first row:
       rho(1) = rhoMin + h;
-      V = rho(1)*rho(1)*omega*omega + 1/rho(1);
+      V = rho(1)*rho(1)*omega*omega; // + 1/rho(1);
       d = 2./(h*h) + V;
       A(0,0) = d;
       A(0,1) = e;
@@ -138,69 +145,34 @@ int main()
 
 
    if (method == 0)
+
    {
       //method is the local "jacobi" method
+      start = clock();         //start timer
       arma::Col<double> eigval;
       Local::jacobi(A,B,n,eigval);
+      finish = clock();        //stop timer
+      std::cout << "time jacobi algorithm: " << static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+
       arma::Mat<double> eigvec = B;
-
-      arma::Col<double> u(n+2);
-      u(0) = 0.;
-      u(n+1) = 0.;
-
-      for ( int i= 1; i<=n ; ++i)
-      {
-         arma::Col<double> v=eigvec.col(i-1);
-         //std::cout << "eigvec colonne: " << v << std::endl;
-         Local::integral(rhoMin, rhoMaks, n, u(i),v);
-      }
-      //std::cout << "eigvec: " << eigvec << std::endl;
-      std::string fileName("test.m");
-      std::ofstream write(fileName.c_str());
-      //write to file for plotting
-      const std::string fileName_val("rho");
-      Local::writeMatlabVec(write, rho, fileName_val,n);
-      const std::string fileName_vec("u");
-      Local::writeMatlabVec(write, u, fileName_vec,n);
-      write.close();
-
-      cout << "lamda1 " << eigval(0) << endl;
-      cout << "lamda2 " << eigval(1) << endl;
-      cout << "lamda3 " << eigval(2) << endl;
+      arma::Col<double> eigvalSorted = sort(eigval);
+      std::cout << "lambda0: " << eigvalSorted(0) << std::endl;
+      std::cout << "lambda1: " << eigvalSorted(1) << std::endl;
+      std::cout << "lambda2: " << eigvalSorted(2) << std::endl;
    }
 
 
    else if (method == 1)
    {
        //method is the armadillo "eig_sum" function
-
+ start = clock();         //start timer
       vec eigval;
       arma::Mat<double> eigvec;
       eig_sym(eigval, eigvec, A);
-      //std::cout << "eigval: " << eigval << std::endl;
+      finish = clock();        //stop timer
+      std::cout << "time armadillo eig_sym algorithm: " << static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+      Local::plot(eigvec, rho, fileName,n,lambda);
 
-
-      //std::cout << "eigvec: " << eigvec << std::endl;
-
-      arma::Col<double> u(n+2);
-      u(0) = 0.;
-      u(n+1) = 0.;
-
-      for ( int i= 1; i<=n ; ++i)
-      {
-         arma::Col<double> v=eigvec.col(i-1);
-         //std::cout << "eigvec colonne: " << v << std::endl;
-         Local::integral(rhoMin, rhoMaks, n, u(i),v);
-      }
-      //std::cout << "eigvec: " << eigvec << std::endl;
-      std::string fileName("test.m");
-      std::ofstream write(fileName.c_str());
-      //write to file for plotting
-      const std::string fileName_val("rho");
-      Local::writeMatlabVec(write, rho, fileName_val,n);
-      const std::string fileName_vec("u");
-      Local::writeMatlabVec(write, u, fileName_vec,n);
-      write.close();
    }
 
 }
@@ -374,7 +346,7 @@ double c, s;
 */
 void
 Local::writeMatlabVec(std::ofstream& write,
-                      arma::Col<double>& vec,
+                      const arma::Col<double>& vec,
                       const std::string& name,
                       const int& n)
 {
@@ -414,17 +386,32 @@ Local::writeMatlabMat(std::ofstream& write,
    write << "]" << "\n\n";
 }
 
+
 void
-Local::integral(const double rhoMin,
-                   const double rhoMaks,
-                   const int n,
-                   double& u_i,
-                   const arma::Col<double>& v)
+Local::plot(const arma::Mat<double>& eigvec,
+            const arma::Col<double>& rho,
+            const std::string& fileName,
+            const int& n,
+            const int& lambda)
 {
-   double step = (rhoMaks-rhoMin)/static_cast<double>(n+2);
-   for ( int j = 0 ; j<n ; ++j)
+   arma::Col<double> u(n+2);
+   u(0) = 0.;
+   u(n+1) = 0.;
+   arma::Col<double> v=eigvec.col(lambda-1);
+
+   for ( int i= 1; i<=n ; ++i)
    {
-      u_i += v(j)*v(j);
+      u(i)=v(i-1)*v(i-1);
    }
-u_i = u_i*step;
+
+   std::ofstream write(fileName.c_str());
+   //write to file for plotting
+   const std::string fileName_val("rho");
+   Local::writeMatlabVec(write, rho, fileName_val,n);
+   const std::string fileName_vec("u_squared");
+   Local::writeMatlabVec(write, u, fileName_vec,n);
+   write.close();
 }
+
+
+
