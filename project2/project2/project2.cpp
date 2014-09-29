@@ -57,20 +57,20 @@ namespace
 
 int main()
 {
-   int number = 1; //one(1) or two(2) electron system
-   int method = 0; //armadillosystem(1) or jacobifunction(0)
-   const int nsteps =500;
-   const double rhoMaks = 5.0 ;
-   int lambda = 1; //select eigenvalue: lambda 1(1), lambda 2(2) etc
-   const std::string fileName("omega5_1.m");
-   double omega = 0.01;
+   int number = 2; //one(1) or two(2) electron system
+   int method = 1; //armadillosystem(1) or jacobifunction(0)
+   const int nsteps =800;
+   const double rhoMaks = 45. ;
+   int lambda = 2; //select eigenvalue: lambda 0(0), lambda 1(1) etc
+   const std::string fileName("omega5_4.m");
+   double omega = 5;
 
 
    double V = 0.;
    double d= 0.;
    const int n = nsteps-1;
    const double rhoMin = 0.;
-   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps-1);
+   const double h = (rhoMaks-rhoMin)/static_cast<double>(nsteps);
    std::cout << h << std::endl;
    const double e = -1./(h*h);
    std::cout << "e: " << e << std::endl;
@@ -118,7 +118,7 @@ int main()
    {
       //first row:
       rho(1) = rhoMin + h;
-      V = rho(1)*rho(1)*omega*omega; // + 1/rho(1);
+      V = rho(1)*rho(1)*omega*omega + 1/rho(1);
       d = 2./(h*h) + V;
       A(0,0) = d;
       A(0,1) = e;
@@ -397,7 +397,7 @@ Local::plot(const arma::Mat<double>& eigvec,
    arma::Col<double> u(n+2);
    u(0) = 0.;
    u(n+1) = 0.;
-   arma::Col<double> v=eigvec.col(lambda-1);
+   arma::Col<double> v=eigvec.col(lambda);
 
    for ( int i= 1; i<=n ; ++i)
    {
