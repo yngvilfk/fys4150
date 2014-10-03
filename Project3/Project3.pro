@@ -1,6 +1,6 @@
 SOURCES += \
     main.cpp \
-    rk4.cpp
+    odesolver.cpp
 
 HEADERS += \
-    rk4.h
+    odesolver.h
