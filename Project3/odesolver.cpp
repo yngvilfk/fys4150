@@ -11,14 +11,14 @@ OdeSolver::~OdeSolver()
 }
 
 
-
+void
 OdeSolver::derivatives(double& R, arma::Col<double>& in,arma::Col<double>& out)
 {
-   out(0) = in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
+   out(0) = -in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
    out(1) = in(0)/(R*R*R);
 }
 
-
+void
 OdeSolver::rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout, double& delta_t)
 {
    /*
@@ -26,7 +26,7 @@ OdeSolver::rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout, d
     yin  - a two dimension array who holds the value of: yin(0)=x, yin(1)=dx/dt = v_x at time t
     yout - a two dimension array who holds the value of: yin(0)=x, yin(1)=dx/dt = v_x at time t+delta_t
     */
-   arma::col<double> k1(2), k2(2), k3(2), k4(2), y_k(2);
+   arma::Col<double> k1(2), k2(2), k3(2), k4(2), y_k(2);
    //Callculation of k1
    OdeSolver::derivatives(R, yin, yout);
    k1(1) = yout(1)* delta_t;
@@ -59,10 +59,16 @@ OdeSolver::rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout, d
 }
 
 
-
+void
 OdeSolver::rk4()
 {
-   arma::Col<double> yout(2), y_h(2), xout(2), x_h(2);
+    arma::Col<double> yout(2), y_h(2), xout(2), x_h(2), y(2), x(2);
+    x(0) = 0.5;
+    y(0) = 0.;
+    x(1) = 0.;
+    y(1) = 300.;
+    int n= 10;
+    double delta_t = 0.001;
    double t_h = 0.0;
    y_h(0) = y(0); //y
    y_h(1) = y(1); //v_y
@@ -70,19 +76,30 @@ OdeSolver::rk4()
    x_h(1) = x(1); //x_y
 
    std::ofstream fout("rk4.m");
-   fout.setf(ios::scientific);
+   //fout.setf(std::ios::scientific);
    fout.precision(20);
-   fout << "% [t x v_x y v_y]" << "\n";
+   fout << "describe = '[t x v_x y v_y]'" << "\n";
    fout << "A = [ " ;
+   arma::Col<double> earth(2), sun(2);
+   sun(0) = 0.0;
+   sun(1) = 0.0;
    for (int i = 1 ; i<=n ; ++i)
    {
-      rk4_step(R, x_h, xout, delta_t_roof);
-      rk4_step(R, y_h, yout, delta_t_roof);
+       earth(0) = x_h(0);
+       earth(1) = y_h(0);
+       Distance d;
+      double R = d.twoObjects(earth,sun);
+      std::cout << R << std::endl;
+      OdeSolver::rk4_step(R, x_h, xout, delta_t);
+      OdeSolver::rk4_step(R, y_h, yout, delta_t);
       fout << i*delta_t << "\t\t" << xout(0) << "\t\t" << xout(1) << "\t\t" << yout(0) << "\t\t" << yout(1) << "\n";
-      t_h += delta_t_roof;
+      t_h += delta_t;
       y_h(0) = yout(0);
       y_h(1) = yout(1);
+      x_h(0) = xout(0);
+      x_h(1) = xout(1);
+
    }
    fout << "]" << "\n\n";
-   fout.close;
+   fout.close();
 }

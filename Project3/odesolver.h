@@ -6,6 +6,7 @@
 #include<iostream>
 #include<fstream>
 #include<math.h>
+#include<distance.h>
 
 class OdeSolver
 {
@@ -13,9 +14,14 @@ class OdeSolver
       OdeSolver();
       ~OdeSolver();
 
-      derivatives(double&, arma::Col<double>&, arma::Col<double>&);
-      rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout, double& delta_t);
-      rk4();
+      void derivatives(double&, arma::Col<double>&, arma::Col<double>&);
+      void rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout, double& delta_t);
+      void rk4();
+
+
+
+
+
 };
 
 #endif // ODESOLVER_H

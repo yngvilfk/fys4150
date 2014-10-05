@@ -4,6 +4,7 @@
 
 int main()
 {
-   OdeSolver a;
+   OdeSolver testcase;
+   testcase.rk4();
    return 0;
 }
