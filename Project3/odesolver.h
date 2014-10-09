@@ -35,6 +35,7 @@ class OdeSolver
       double v0x;
       double v0y;
       int n;
+      double PI;
 
 
 

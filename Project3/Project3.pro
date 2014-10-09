@@ -1,12 +1,14 @@
 SOURCES += \
     main.cpp \
     odesolver.cpp \
-    planet.cpp \
     distance.cpp \
-    odesolver2.cpp
+    odesolver2.cpp \
+    system.cpp \
+    object.cpp
 
 HEADERS += \
     odesolver.h \
-    planet.h \
     distance.h \
-    odesolver2.h
+    odesolver2.h \
+    system.h \
+    object.h

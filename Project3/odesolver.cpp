@@ -13,6 +13,7 @@ OdeSolver::OdeSolver(double x_0,
    , v0y(v0_y)
    , n(timesteps)
 {
+    PI = 4*std::atan(1.0);
 }
 
 OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y, int timesteps)
@@ -31,6 +32,7 @@ OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y)
    , v0x(v0_x)
    , v0y(v0_y)
 {
+   PI = 4*std::atan(1.0);
    delta_t = 0.0001;
    n = 100;
 }
@@ -39,12 +41,13 @@ OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y)
 
 OdeSolver::OdeSolver()
 {
-   delta_t = 0.0001;
+   PI = 4*std::atan(1.0);
+   delta_t = 0.001;
    n = 1000;
    x0 = 1.0;
    y0 = 0.0;
    v0x = 0.0;
-   v0y = -2.*3.14159;
+   v0y = -2.*PI;
 }
 
 
@@ -57,7 +60,7 @@ void
 OdeSolver::derivatives(double& R, arma::Col<double>& in,arma::Col<double>& out)
 {
    out(0) = -in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
-   out(1) = 4*3.14159*3.14159*in(0)/(R*R*R);
+   out(1) = 4*PI*PI*in(0)/(R*R*R);
 }
 
 void
@@ -144,56 +147,51 @@ OdeSolver::rk4()
 void
 OdeSolver::verlet()
 {
-   arma::Col<double> y(3), x(3), yin(2), xin(2), yout(2), xout(2);
+   arma::Col<double> y(2), x(2), vy(2), vx(2);
    //startpos
-   x(0) = 0.009;
-   y(0) = -0.001;
-   x(1) = x0;
-   y(1) = y0;
+   x(0) = x0;
+   y(0) = y0;
+   vx(0) = v0x;
+   vy(0) = v0y;
 
 
-//   //use rk4 to compute first step:
-//   yin(0) = y(0);
-//   yin(1) = v0y;
-//   xin(0) = x(0);
-//   xin(1) = v0x;
    arma::Col<double> earth(2), sun(2);
    sun(0) = 0.0;
    sun(1) = 0.0;
    earth(0) = x(0);
    earth(1) = y(0);
-//   Distance d;
-//   double R = d.twoObjects(earth,sun);
-//   OdeSolver::rk4_step(R, xin, xout);
-//   OdeSolver::rk4_step(R, yin, yout);
-//   x(1) = xout(0);
-//   y(1) = yout(0);
-//   std::cout << "x: " << xout(1) << "y " << yout(1) << std::endl;
 
-   std::ofstream fout("verlet.m");
+
+   std::ofstream fout("verlet1.m");
    //fout.setf(std::ios::scientific);
    fout.precision(16);
    //fout.width(8);
    fout << "describe = '[t x y]'" << "\n";
    fout << "A = [ " ;
    fout << 0.0 << "\t\t" << x(0) << "\t\t" << y(0) << "\n";
-   fout << 1*delta_t << "\t\t" << x(1) << "\t\t" << y(1) << "\n";
 
 
-   for (int i = 2 ; i<=n ; ++i)
+
+   for (int i = 1 ; i<=n ; ++i)
    {
-       earth(0) = x(1);
-       earth(1) = y(1);
+       earth(0) = x(0);
+       earth(1) = y(0);
        Distance d;
       const double R = d.twoObjects(earth,sun);
       std::cout << R << std::endl;
-      x(2) = 2*x(1)-x(0)-(delta_t*delta_t*4.0*3.14159*3.14159*x(1)*x(1))/(R*R*R);
-      y(2) = 2*y(1)-y(0)-(delta_t*delta_t*4.0*3.14159*3.14159*y(1)*y(1))/(R*R*R);
-      fout << i*delta_t << "\t\t" << x(2) << "\t\t" << y(2) << "\n";
+
+      x(1) = x(0)+vx(0)*delta_t - 0.5*delta_t*delta_t*4*PI*PI*x(0)/(R*R*R); //x_i+1
+      y(1) = y(0)+vy(0)*delta_t - 0.5*delta_t*delta_t*4*PI*PI*y(0)/(R*R*R); //y_i+1
+      vx(1) = vx(0) - 0.5*(4*PI*PI*x(0)/(R*R*R)+4*PI*PI*x(1)/(R*R*R))*delta_t; //vx_i+1
+      vy(1) = vy(0) - 0.5*(4*PI*PI*y(0)/(R*R*R)+4*PI*PI*y(1)/(R*R*R))*delta_t; //vy_i+1
+
+      fout << i*delta_t << "\t\t" << x(1) << "\t\t" << y(1) << "\n";
       x(0) = x(1);
-      x(1) = x(2);
+      vx(0) = vx(1);
       y(0) = y(1);
-      y(1) = y(2);
+      vy(0) = vy(1);
+
+
    }
    fout << "];" << "\n\n";
    fout << "plot (A(:,2),A(:,3))" << "\n\n";

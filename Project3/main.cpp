@@ -5,8 +5,8 @@
 
 int main()
 {
-   OdeSolver2 testcase;
-   //testcase.verlet();
+   OdeSolver testcase;
+   testcase.verlet();
    testcase.rk4();
    return 0;
 }
