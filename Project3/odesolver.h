@@ -16,6 +16,7 @@ class OdeSolver
       OdeSolver( double x_0, double y_0, double v0_x, double v0_y, int timesteps, double delta_t_in);
       OdeSolver(double x_0, double y_0, double v0_x, double v0_y, int timesteps);
       OdeSolver(double x_0, double y_0, double v0_x, double v0_y);
+      OdeSolver();
       ~OdeSolver();
 
 
