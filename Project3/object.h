@@ -7,20 +7,27 @@
 class Object
 {
 public:
-    Object();
+    Object(double x,
+           double y,
+           double vx,
+           double vy,
+           const double objectMass,
+           std::string objectName);
+
     Object(arma::Col<double> pos,
            arma::Col<double> vel,
-           double objectMass,
-           char* objectName);
+           const double objectMass,
+           std::string objectName);
     ~Object();
-
-private:
-    char* name;
-    double mass;
-    arma::Col<double> position;
-    arma::Col<double> velocity;
+    void update(arma::Col<double> pos,
+                arma::Col<double> vel);
 
 
+    std::string name;
+    double      mass;   //in solar masses
+
+    arma::Col<double> position;   //in astronomical units (AU)
+    arma::Col<double> velocity;   //in AU/year
 };
 
 #endif // OBJECT_H

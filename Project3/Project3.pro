@@ -1,3 +1,5 @@
+LIBS += -larmadillo
+
 SOURCES += \
     main.cpp \
     odesolver.cpp \

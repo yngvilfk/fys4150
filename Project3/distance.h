@@ -11,7 +11,7 @@ class Distance
 public:
     Distance();
     ~Distance();
-    double twoObjects(const arma::Col<double>&, const arma::Col<double>&);
+    double twoObjects(arma::Col<double>&, arma::Col<double>&);
 
 };
 

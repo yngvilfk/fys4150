@@ -8,27 +8,25 @@
 #include<math.h>
 #include<distance.h>
 #include<iomanip>
+#include<system.h>
+#include<object.h>
+
 
 
 class OdeSolver2
 {
    public:
-      OdeSolver2( double x_0, double y_0, double v0_x, double v0_y, int timesteps, double delta_t_in);
-      OdeSolver2(double x_0, double y_0, double v0_x, double v0_y, int timesteps);
-      OdeSolver2(double x_0, double y_0, double v0_x, double v0_y);
-      OdeSolver2();
+      OdeSolver2( System &mysystem);
       ~OdeSolver2();
 
-
-      void rk4();
+      void rk4(double time,
+               int nSteps);
       void verlet();
 
+      System mysolarsystem;
 
    protected:
-      void derivatives(double&, arma::Col<double>&, arma::Col<double>&);
-      void derivativesEarth(double&, arma::Col<double>&, arma::Col<double>&,double& posJupiter, double& RJE);
-      void rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout);
-      void rk4_stepEarth(double R, arma::Col<double>& yin, arma::Col<double>& yout,double& posJupiter, double& RJE);
+
 
    private:
       double delta_t;

@@ -42,12 +42,12 @@ OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y)
 OdeSolver::OdeSolver()
 {
    PI = 4*std::atan(1.0);
-   delta_t = 0.001;
+   delta_t = 1.0/1001.0;
    n = 1000;
    x0 = 1.0;
    y0 = 0.0;
    v0x = 0.0;
-   v0y = -2.*PI;
+   v0y = 2.*PI;
 }
 
 
@@ -59,8 +59,8 @@ OdeSolver::~OdeSolver()
 void
 OdeSolver::derivatives(double& R, arma::Col<double>& in,arma::Col<double>& out)
 {
-   out(0) = -in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
-   out(1) = 4*PI*PI*in(0)/(R*R*R);
+   out(0) = in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
+   out(1) = -4*PI*PI*in(0)/(R*R*R);
 }
 
 void
@@ -137,7 +137,6 @@ OdeSolver::rk4()
       y(1) = yout(1);
       x(0) = xout(0);
       x(1) = xout(1);
-      std::cout << "x: " << xout(1) << "y " << yout(1) << std::endl;
 
    }
    fout << "];" << "\n\n";

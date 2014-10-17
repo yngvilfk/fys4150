@@ -9,6 +9,7 @@
 #include<math.h>
 #include<distance.h>
 #include<iomanip>
+#include<distance.h>
 
 class System
 {
@@ -16,23 +17,26 @@ public:
     System();
     ~System();
 
-    void addObject(arma::Col<double> pos,
-                   arma::Col<double> vel,
-                   double m,
-                   char* name);
+    void addObject(Object &newobject);
 
-    void solve(const std::string filename);
-    arma::Col<double> force(arma::Col<double> pos1,
-                            arma::Col<double> pos2,
-                            double GM);
+    void force(Object &object1,
+               Object &object2,
+               arma::Col<double>& F);
+
+    double kineticEnergi(Object movingObject);
+
+    double potentialEnergy(Object movingObject,
+                           Object otherObject);
 
 
-    Object objectlist[20];
+    double angularMomentum(Object movingObject);
+
+
     int numberOfObject;
-
+   std::vector<Object> objectlist;
 
 private:
-
+   double PI;
 
 
 };

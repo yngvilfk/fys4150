@@ -9,8 +9,8 @@ Distance::~Distance()
 {
 }
 
-double Distance::twoObjects(const arma::Col<double>& object1,
-                            const arma::Col<double>& object2)
+double Distance::twoObjects(arma::Col<double>& object1,
+                            arma::Col<double>& object2)
 {
     /*function takes in the coordinates of two objects, object 1 and object 2:
     object 1 have the coordinates (x,y): (object1(0), object1(1))
