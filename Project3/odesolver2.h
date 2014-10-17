@@ -21,7 +21,8 @@ class OdeSolver2
 
       void rk4(double time,
                int nSteps);
-      void verlet();
+      void verlet(double time,
+                  int nSteps);
 
       System mysolarsystem;
 
@@ -30,15 +31,8 @@ class OdeSolver2
 
    private:
       double delta_t;
-      double x0;
-      double y0;
-      double v0x;
-      double v0y;
+
       int n;
-      double x0J;
-      double y0J;
-      double v0xJ;
-      double v0yJ;
 
 
 

@@ -1,21 +1,17 @@
-#include "odesolver2.h"
+#include "odesolver3.h"
 
-
-
-OdeSolver2::OdeSolver2(System &mysystem)
-   : mysolarsystem(mysystem)
+Odesolver3::Odesolver3(System &mysystem)
+    : mysolarsystem(mysystem)
 {
 }
 
-
-OdeSolver2::~OdeSolver2()
+Odesolver3::~Odesolver3()
 {
 }
 
-
-//OdeSolver2::rk4( std::string& fileName)
+//Odesolver3::rk4( std::string& fileName)
 void
-OdeSolver2::rk4(double time,
+Odesolver3::rk4(double time,
                 int nSteps)
 {
    arma::Col<double> k1x(2), k2x(2), k3x(2), k4x(2), k1y(2), k2y(2), k3y(2), k4y(2);
@@ -36,7 +32,7 @@ OdeSolver2::rk4(double time,
    for ( int k = 0 ; k < n ; ++k )
    {
 
-      for (int i = 1 ; i < mysolarsystem.numberOfObject ; ++i)
+      for (int i = 0 ; i < mysolarsystem.numberOfObject ; ++i)
       {
 
          Object &mainbody = mysolarsystem.objectlist[i];
@@ -211,44 +207,43 @@ OdeSolver2::rk4(double time,
 
 
          fout <<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << k*delta_t << "\t\t" << kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
-         if (i == mysolarsystem.numberOfObject-1)
+         if (i == mysolarsystem.numberOfObject - 1)
          {
             fout << "\n";
          }
       }
    }
    fout << "];" << "\n\n";
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+2 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << "')" << "\n\n";
        fout << "hold on;" << "\n\n";
 
    }
    fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+4 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << " " << "kinetic energy" << "')" << "\n\n";
        fout << "hold on;" << "\n\n";
    }
 
    fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+5 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << " " << "potential energy" << "')" << "\n\n";
        fout << "hold on;" << "\n\n";
    }
 
    fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+6 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << " " << "momentum" << "')" << "\n\n";
        fout << "hold on;" << "\n\n";
@@ -263,7 +258,7 @@ OdeSolver2::rk4(double time,
 
 
 void
-OdeSolver2::verlet(double time,
+Odesolver3::verlet(double time,
                    int nSteps)
 {
    n = nSteps;
@@ -282,7 +277,7 @@ OdeSolver2::verlet(double time,
    for (int k = 1 ; k<=n ; ++k)
    {
 
-       for ( int i = 1 ; i < mysolarsystem.numberOfObject ; ++i)
+       for ( int i = 0 ; i < mysolarsystem.numberOfObject ; ++i)
        {
           Object &mainbody = mysolarsystem.objectlist[i];
           Object tempBody = mainbody;
@@ -343,7 +338,7 @@ OdeSolver2::verlet(double time,
       } //end for
 
       fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t"<< kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
-      if (i == mysolarsystem.numberOfObject)
+      if (i == mysolarsystem.numberOfObject - 1)
       {
          fout << "\n";
       }
@@ -355,36 +350,35 @@ OdeSolver2::verlet(double time,
     }
    }
    fout << "];" << "\n\n";
-   fout << "figure;" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << "')" << "\n\n";
        fout << "hold on;" << "\n\n";
    }
-   fout << "figure" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+   fout << "figure()" << "\n\n";
+   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
    {
-       Object thisobject = mysolarsystem.objectlist[j+1];
+       Object thisobject = mysolarsystem.objectlist[j];
        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
        fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
        fout << "hold on;" << "\n\n";
    }
     fout << "figure" << "\n\n";
 
-    for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+    for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
     {
-        Object thisobject = mysolarsystem.objectlist[j+1];
+        Object thisobject = mysolarsystem.objectlist[j];
         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
         fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
         fout << "hold on;" << "\n\n";
     }
      fout << "figure" << "\n\n";
 
-     for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+     for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
      {
-         Object thisobject = mysolarsystem.objectlist[j+1];
+         Object thisobject = mysolarsystem.objectlist[j];
          fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
          fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
          fout << "hold on;" << "\n\n";

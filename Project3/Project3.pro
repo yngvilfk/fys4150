@@ -6,11 +6,13 @@ SOURCES += \
     distance.cpp \
     odesolver2.cpp \
     system.cpp \
-    object.cpp
+    object.cpp \
+    odesolver3.cpp
 
 HEADERS += \
     odesolver.h \
     distance.h \
     odesolver2.h \
     system.h \
-    object.h
+    object.h \
+    odesolver3.h
