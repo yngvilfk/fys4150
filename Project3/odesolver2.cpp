@@ -13,18 +13,18 @@ OdeSolver2::~OdeSolver2()
 }
 
 
-//OdeSolver2::rk4( std::string& fileName)
+
 void
 OdeSolver2::rk4(double time,
-                int nSteps)
+                int nSteps,
+                std::string filename)
 {
    arma::Col<double> k1x(2), k2x(2), k3x(2), k4x(2), k1y(2), k2y(2), k3y(2), k4y(2);
    n = nSteps;
    delta_t = time/(n+1);
 
 
-   //std::ofstream fout(fileName.c_str());
-   std::ofstream fout("test.m");
+   std::ofstream fout(filename.c_str());
    //fout.setf(std::ios::scientific);
    fout.precision(16);
    //fout.width(16);
@@ -36,223 +36,226 @@ OdeSolver2::rk4(double time,
    for ( int k = 0 ; k < n ; ++k )
    {
 
-      for (int i = 1 ; i < mysolarsystem.numberOfObject ; ++i)
+      for (int i = 0 ; i < mysolarsystem.numberOfObject ; ++i)
       {
-
          Object &mainbody = mysolarsystem.objectlist[i];
-         Object tempBody = mainbody;
-         arma::Col<double> force(2);
-         force.zeros();
-
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+         std::string nameSun = "sun";
+         if (mainbody.name!=nameSun)
          {
+            Object tempBody = mainbody;
+            arma::Col<double> force(2);
+            force.zeros();
 
-            if (j != i)
+            for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
             {
-               arma::Col<double> F(2);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force(0) += F(0);
-               force(1) += F(1);
-            }
 
-         } //end for
+               if (j != i)
+               {
+                  arma::Col<double> F(2);
+                  Object body = mysolarsystem.objectlist[j];
+                  mysolarsystem.force(tempBody, body,F);
+                  force(0) += F(0);
+                  force(1) += F(1);
+               }
 
-
-
-         tempBody.position(0) = mainbody.position(0);
-         tempBody.velocity(0) = mainbody.velocity(0);
-         tempBody.position(1) = mainbody.position(1);
-         tempBody.velocity(1) = mainbody.velocity(1);
+            } //end for
 
 
 
-         // Calculate k1
-
-         double dxdt = tempBody.velocity(0);
-         double dvxdt = force(0);
-
-         double dydt = tempBody.velocity(1);
-         double dvydt = force(1);
+            tempBody.position(0) = mainbody.position(0);
+            tempBody.velocity(0) = mainbody.velocity(0);
+            tempBody.position(1) = mainbody.position(1);
+            tempBody.velocity(1) = mainbody.velocity(1);
 
 
-         k1x(0) = dxdt*delta_t;
-         k1x(1) = dvxdt*delta_t;
 
-         k1y(0) = dydt*delta_t;
-         k1y(1) = dvydt*delta_t;
+            // Calculate k1
 
+            double dxdt = tempBody.velocity(0);
+            double dvxdt = force(0);
 
-         tempBody.position(0) = mainbody.position(0) + k1x(0)*0.5;
-         tempBody.velocity(0) = mainbody.velocity(0) + k1x(1)*0.5;
-
-         tempBody.position(1) = mainbody.position(1) + k1y(0)*0.5;
-         tempBody.velocity(1) = mainbody.velocity(1) + k1y(1)*0.5;
+            double dydt = tempBody.velocity(1);
+            double dvydt = force(1);
 
 
-         // k2
-         force.zeros();
+            k1x(0) = dxdt*delta_t;
+            k1x(1) = dvxdt*delta_t;
 
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
+            k1y(0) = dydt*delta_t;
+            k1y(1) = dvydt*delta_t;
 
-            if (j != i)
+
+            tempBody.position(0) = mainbody.position(0) + k1x(0)*0.5;
+            tempBody.velocity(0) = mainbody.velocity(0) + k1x(1)*0.5;
+
+            tempBody.position(1) = mainbody.position(1) + k1y(0)*0.5;
+            tempBody.velocity(1) = mainbody.velocity(1) + k1y(1)*0.5;
+
+
+            // k2
+            force.zeros();
+
+            for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
             {
-               arma::Col<double> F(2);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force(0) += F(0);
-               force(1) += F(1);
-            }
 
-         } //end for
+               if (j != i)
+               {
+                  arma::Col<double> F(2);
+                  Object body = mysolarsystem.objectlist[j];
+                  mysolarsystem.force(tempBody, body,F);
+                  force(0) += F(0);
+                  force(1) += F(1);
+               }
 
-         dxdt = tempBody.velocity(0);
-         dvxdt = force(0);
-         dydt = tempBody.velocity(1);
-         dvydt = force(1);
+            } //end for
 
-         k2x(0) = dxdt*delta_t;
-         k2x(1) = dvxdt*delta_t;
-         k2y(0) = dydt*delta_t;
-         k2y(1) = dvydt*delta_t;
+            dxdt = tempBody.velocity(0);
+            dvxdt = force(0);
+            dydt = tempBody.velocity(1);
+            dvydt = force(1);
 
-         tempBody.position(0) = mainbody.position(0) + k2x(0)*0.5;
-         tempBody.velocity(0) = mainbody.velocity(0) + k2x(1)*0.5;
-         tempBody.position(1) = mainbody.position(1) + k2y(0)*0.5;
-         tempBody.velocity(1) = mainbody.velocity(1) + k2y(1)*0.5;
+            k2x(0) = dxdt*delta_t;
+            k2x(1) = dvxdt*delta_t;
+            k2y(0) = dydt*delta_t;
+            k2y(1) = dvydt*delta_t;
+
+            tempBody.position(0) = mainbody.position(0) + k2x(0)*0.5;
+            tempBody.velocity(0) = mainbody.velocity(0) + k2x(1)*0.5;
+            tempBody.position(1) = mainbody.position(1) + k2y(0)*0.5;
+            tempBody.velocity(1) = mainbody.velocity(1) + k2y(1)*0.5;
 
 
 
-         // k3
-         force.zeros();
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-
-            if (j != i)
+            // k3
+            force.zeros();
+            for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
             {
-               arma::Col<double> F(2);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force(0) += F(0);
-               force(1) += F(1);
-            }
-         } //end for
+
+               if (j != i)
+               {
+                  arma::Col<double> F(2);
+                  Object body = mysolarsystem.objectlist[j];
+                  mysolarsystem.force(tempBody, body,F);
+                  force(0) += F(0);
+                  force(1) += F(1);
+               }
+            } //end for
 
 
-         dxdt = tempBody.velocity(0);
-         dvxdt = force(0);
-         dydt = tempBody.velocity(1);
-         dvydt = force(1);
+            dxdt = tempBody.velocity(0);
+            dvxdt = force(0);
+            dydt = tempBody.velocity(1);
+            dvydt = force(1);
 
-         k3x(0) = dxdt*delta_t;
-         k3x(1) = dvxdt*delta_t;
-         k3y(0) = dydt*delta_t;
-         k3y(1) = dvydt*delta_t;
+            k3x(0) = dxdt*delta_t;
+            k3x(1) = dvxdt*delta_t;
+            k3y(0) = dydt*delta_t;
+            k3y(1) = dvydt*delta_t;
 
-         tempBody.position(0) = mainbody.position(0) + k3x(0);
-         tempBody.velocity(0) = mainbody.velocity(0) + k3x(1);
-         tempBody.position(1) = mainbody.position(1) + k3y(0);
-         tempBody.velocity(1) = mainbody.velocity(1) + k3y(1);
-
-
+            tempBody.position(0) = mainbody.position(0) + k3x(0);
+            tempBody.velocity(0) = mainbody.velocity(0) + k3x(1);
+            tempBody.position(1) = mainbody.position(1) + k3y(0);
+            tempBody.velocity(1) = mainbody.velocity(1) + k3y(1);
 
 
-         // k4
-         force.zeros();
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-            if (j != i)
+
+
+            // k4
+            force.zeros();
+            for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
             {
-               arma::Col<double> F(2);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force(0) += F(0);
-               force(1) += F(1);
-            }
-         } //end for
+               if (j != i)
+               {
+                  arma::Col<double> F(2);
+                  Object body = mysolarsystem.objectlist[j];
+                  mysolarsystem.force(tempBody, body,F);
+                  force(0) += F(0);
+                  force(1) += F(1);
+               }
+            } //end for
 
-         dxdt = tempBody.velocity(0);
-         dvxdt = force(0);
-         dydt = tempBody.velocity(1);
-         dvydt = force(1);
+            dxdt = tempBody.velocity(0);
+            dvxdt = force(0);
+            dydt = tempBody.velocity(1);
+            dvydt = force(1);
 
-         k4x(0) = dxdt*delta_t;
-         k4x(1) = dvxdt*delta_t;
-         k4y(0) = dydt*delta_t;
-         k4y(1) = dvydt*delta_t;
+            k4x(0) = dxdt*delta_t;
+            k4x(1) = dvxdt*delta_t;
+            k4y(0) = dydt*delta_t;
+            k4y(1) = dvydt*delta_t;
 
-         tempBody.position(0) = mainbody.position(0) + 1.0/6.0 * (k1x(0) + 2.*k2x(0) + 2.*k3x(0) + k4x(0));
-         tempBody.velocity(0) = mainbody.velocity(0) + 1.0/6.0 * (k1x(1) + 2.*k2x(1) + 2.*k3x(1) + k4x(1));
-         tempBody.position(1) = mainbody.position(1) + 1.0/6.0 * (k1y(0) + 2.*k2y(0) + 2.*k3y(0) + k4y(0));
-         tempBody.velocity(1) = mainbody.velocity(1) + 1.0/6.0 * (k1y(1) + 2.*k2y(1) + 2.*k3y(1) + k4y(1));
-
-
-
-         mainbody.update(tempBody.position, tempBody.velocity);
+            tempBody.position(0) = mainbody.position(0) + 1.0/6.0 * (k1x(0) + 2.*k2x(0) + 2.*k3x(0) + k4x(0));
+            tempBody.velocity(0) = mainbody.velocity(0) + 1.0/6.0 * (k1x(1) + 2.*k2x(1) + 2.*k3x(1) + k4x(1));
+            tempBody.position(1) = mainbody.position(1) + 1.0/6.0 * (k1y(0) + 2.*k2y(0) + 2.*k3y(0) + k4y(0));
+            tempBody.velocity(1) = mainbody.velocity(1) + 1.0/6.0 * (k1y(1) + 2.*k2y(1) + 2.*k3y(1) + k4y(1));
 
 
-         double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
-         double potentialEnergy = 0.0;
-         double angularMomentum = mysolarsystem.angularMomentum(mainbody);
+
+            mainbody.update(tempBody.position, tempBody.velocity);
 
 
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-            if (j != i)
+            double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
+            double potentialEnergy = 0.0;
+            double angularMomentum = mysolarsystem.angularMomentum(mainbody);
+
+
+            for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
             {
-               Object body = mysolarsystem.objectlist[j];
-               double energy = mysolarsystem.potentialEnergy(mainbody, body);
-               potentialEnergy += energy;
+               if (j != i)
+               {
+                  Object body = mysolarsystem.objectlist[j];
+                  double energy = mysolarsystem.potentialEnergy(mainbody, body);
+                  potentialEnergy += energy;
+               }
+
+            } //end for
+
+
+
+            fout <<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << k*delta_t << "\t\t" << kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
+            if (i == mysolarsystem.numberOfObject-1)
+            {
+               fout << "\n";
             }
-
-         } //end for
-
-
-
-         fout <<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << k*delta_t << "\t\t" << kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
-         if (i == mysolarsystem.numberOfObject-1)
-         {
-            fout << "\n";
          }
       }
    }
    fout << "];" << "\n\n";
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+2 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+2 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
 
-   }
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+4 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "kinetic energy" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+4 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "kinetic energy" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+5 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "potential energy" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+5 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "potential energy" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+6 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "momentum" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+6 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "momentum" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
    fout.close();
 
@@ -264,13 +267,14 @@ OdeSolver2::rk4(double time,
 
 void
 OdeSolver2::verlet(double time,
-                   int nSteps)
+                   int nSteps,
+                   std::string filename)
 {
    n = nSteps;
    delta_t = time/(n+1);
 
 
-   std::ofstream fout("verlet1.m");
+   std::ofstream fout(filename.c_str());
    //fout.setf(std::ios::scientific);
    fout.precision(16);
    //fout.width(8);
@@ -355,40 +359,47 @@ OdeSolver2::verlet(double time,
     }
    }
    fout << "];" << "\n\n";
-   fout << "figure;" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
-   fout << "figure" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j+1];
-       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
-    fout << "figure" << "\n\n";
+//   fout << "figure;" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
+//    fout << "legend(" << "\t\t";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "'" << thisobject.name << "'," << "\t\t";
+//   }
+//   fout << ")" << "\n\n";
+//   fout << "figure" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j+1];
+//       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
+//    fout << "figure" << "\n\n";
 
-    for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-    {
-        Object thisobject = mysolarsystem.objectlist[j+1];
-        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
-        fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
-        fout << "hold on;" << "\n\n";
-    }
-     fout << "figure" << "\n\n";
+//    for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//    {
+//        Object thisobject = mysolarsystem.objectlist[j+1];
+//        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
+//        fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
+//        fout << "hold on;" << "\n\n";
+//    }
+//     fout << "figure" << "\n\n";
 
-     for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
-     {
-         Object thisobject = mysolarsystem.objectlist[j+1];
-         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
-         fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
-         fout << "hold on;" << "\n\n";
-     }
-      fout << "figure" << "\n\n";
+//     for ( int j = 0 ; j < mysolarsystem.numberOfObject-1 ; ++j)
+//     {
+//         Object thisobject = mysolarsystem.objectlist[j+1];
+//         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
+//         fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
+//         fout << "hold on;" << "\n\n";
+//     }
+//      fout << "figure" << "\n\n";
    fout.close();
 }

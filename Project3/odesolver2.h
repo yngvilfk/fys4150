@@ -20,9 +20,11 @@ class OdeSolver2
       ~OdeSolver2();
 
       void rk4(double time,
-               int nSteps);
+               int nSteps,
+               std::string filename);
       void verlet(double time,
-                  int nSteps);
+                  int nSteps,
+                  std::string filename);
 
       System mysolarsystem;
 

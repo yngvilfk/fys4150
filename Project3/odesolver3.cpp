@@ -12,15 +12,16 @@ Odesolver3::~Odesolver3()
 //Odesolver3::rk4( std::string& fileName)
 void
 Odesolver3::rk4(double time,
-                int nSteps)
+                int nSteps,
+                std::string filename)
 {
    arma::Col<double> k1x(2), k2x(2), k3x(2), k4x(2), k1y(2), k2y(2), k3y(2), k4y(2);
    n = nSteps;
    delta_t = time/(n+1);
 
 
-   //std::ofstream fout(fileName.c_str());
-   std::ofstream fout("test.m");
+   std::ofstream fout(filename.c_str());
+//   std::ofstream fout("test.m");
    //fout.setf(std::ios::scientific);
    fout.precision(16);
    //fout.width(16);
@@ -222,32 +223,32 @@ Odesolver3::rk4(double time,
        fout << "hold on;" << "\n\n";
 
    }
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+4 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "kinetic energy" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+4 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "kinetic energy" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+5 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "potential energy" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+5 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "potential energy" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j];
-       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+6 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " " << "momentum" << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j];
+//       fout << "plot (A(:," << 6*j+3 << "),A(:," << 6*j+6 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " " << "momentum" << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
    fout.close();
 
@@ -259,13 +260,14 @@ Odesolver3::rk4(double time,
 
 void
 Odesolver3::verlet(double time,
-                   int nSteps)
+                   int nSteps,
+                   std::string filename)
 {
    n = nSteps;
    delta_t = time/(n+1);
 
 
-   std::ofstream fout("verlet1.m");
+   std::ofstream fout(filename.c_str());
    //fout.setf(std::ios::scientific);
    fout.precision(16);
    //fout.width(8);
@@ -350,39 +352,40 @@ Odesolver3::verlet(double time,
     }
    }
    fout << "];" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j];
-       fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << "')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
-   fout << "figure()" << "\n\n";
-   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-   {
-       Object thisobject = mysolarsystem.objectlist[j];
-       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
-       fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
-       fout << "hold on;" << "\n\n";
-   }
-    fout << "figure" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j];
+//       fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << "')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
 
-    for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-    {
-        Object thisobject = mysolarsystem.objectlist[j];
-        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
-        fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
-        fout << "hold on;" << "\n\n";
-    }
-     fout << "figure" << "\n\n";
+//   fout << "figure()" << "\n\n";
+//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//   {
+//       Object thisobject = mysolarsystem.objectlist[j];
+//       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
+//       fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
+//       fout << "hold on;" << "\n\n";
+//   }
+//    fout << "figure" << "\n\n";
 
-     for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-     {
-         Object thisobject = mysolarsystem.objectlist[j];
-         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
-         fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
-         fout << "hold on;" << "\n\n";
-     }
-      fout << "figure" << "\n\n";
+//    for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//    {
+//        Object thisobject = mysolarsystem.objectlist[j];
+//        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
+//        fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
+//        fout << "hold on;" << "\n\n";
+//    }
+//     fout << "figure" << "\n\n";
+
+//     for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+//     {
+//         Object thisobject = mysolarsystem.objectlist[j];
+//         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
+//         fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
+//         fout << "hold on;" << "\n\n";
+//     }
+//      fout << "figure" << "\n\n";
    fout.close();
 }
