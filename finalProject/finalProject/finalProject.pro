@@ -1,4 +1,5 @@
 LIBS += -larmadillo
+
 SOURCES += \
     main.cpp \
     object.cpp \

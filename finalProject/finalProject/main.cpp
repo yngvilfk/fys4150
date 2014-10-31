@@ -43,6 +43,8 @@ int main()
    solarsystem.addObject(earth);
 
 
+   System solarsystemRK4 = solarsystem;
+   System solarsystemVerlet = solarsystem;
 
    //cant make the for-loop work, make it "manually":
 //       Object tempsun = sun;
@@ -51,19 +53,21 @@ int main()
 //       newpos(1) = tempsun.position(1);
 //       newpos(2) = tempsun.position(2);
 //       sun.update(newpos,tempsun.velocity);
-   std::cout << earth.position << std::endl;
-   std::cout << sun.position << std::endl;
-   std::cout << earth.velocity << std::endl;
-   std::cout << sun.velocity << std::endl;
+//   std::cout << earth.position << std::endl;
+//   std::cout << sun.position << std::endl;
+//   std::cout << earth.velocity << std::endl;
+//   std::cout << sun.velocity << std::endl;
 
+   double year = 10.0;
+   double timestep = year*12;
 
-   std::string rk4Name = "rk4Time4.m";
-   OdeSolver solveSystemRK4(solarsystem);
-   solveSystemRK4.rk4(1.0, 1.0*365.0*24.0, rk4Name);
+   std::string rk4Name = "rk43D.m";
+   OdeSolver solveSystemRK4(solarsystemRK4);
+   solveSystemRK4.rk4(year, timestep, rk4Name);
 
-   std::string verletName = "verletTime4.m";
-   OdeSolver solveSystemVerlet(solarsystem);
-   solveSystemVerlet.verlet(1.0, 1.0*365.0*24.0, verletName);
+   std::string verletName = "verlet3D.m";
+   OdeSolver solveSystemVerlet(solarsystemVerlet);
+   solveSystemVerlet.verlet(year, timestep, verletName);
 
 
 

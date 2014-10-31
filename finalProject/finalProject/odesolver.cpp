@@ -170,8 +170,9 @@ OdeSolver::rk4(double time,
             tempBody.velocity = temp;
             tempBody.position = temp;
          }
+         double ttotalEnergy = kineticEnergi+potentialEnergy;
 
-         fout << k*delta_t<<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << tempBody.position(2) << "\t\t"; //<< kineticEnergi << "\t\t" << potentialEnergy << angularMomentum << "\t\t";
+         fout << k*delta_t<<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << tempBody.position(2) << "\t\t" << ttotalEnergy << "\t\t"; //<<  angularMomentum << "\t\t";
          if (i == mysolarsystem.numberOfObject - 1)
          {
             fout << "\n";
@@ -276,9 +277,9 @@ OdeSolver::verlet(double time,
          tempBody.velocity = temp;
          tempBody.position = temp;
       }
+    double totalEnergy = potentialEnergy+kineticEnergi;
 
-
-      fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << tempBody.position(2) << "\t\t";//<< kineticEnergi << "\t\t" << potentialEnergy << angularMomentum << "\t\t";
+      fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << tempBody.position(2) << "\t\t"<< totalEnergy << "\t\t";// << angularMomentum << "\t\t";
       if (i == mysolarsystem.numberOfObject - 1)
       {
          fout << "\n";
