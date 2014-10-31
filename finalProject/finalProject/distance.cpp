@@ -19,7 +19,7 @@ double Distance::twoObjects(arma::Col<double>& object1,
     const double z1 = object1(2);
     const double x2 = object2(0);
     const double y2 = object2(1);
-    const double z2 = object1(2);
+    const double z2 = object2(2);
     const double R = std::sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)+(z1-z2)*(z1-z2));
     return R;
 }

@@ -28,9 +28,10 @@ System::System()
      //pos1: position object 1, pos 2: position object 2,
      Distance d;
      double R = d.twoObjects(object1.position, object2.position);
-     F(0) = -4*PI*PI*object2.mass*(object1.position(0)-object2.position(0))/(R*R*R);
-     F(1) = -4*PI*PI*object2.mass*(object1.position(1)-object2.position(1))/(R*R*R);
-     F(2) = -4*PI*PI*object2.mass*(object1.position(2)-object2.position(2))/(R*R*R);
+//     F(0) = -4*PI*PI*object2.mass*(object1.position(0)-object2.position(0))/(R*R*R);
+//     F(1) = -4*PI*PI*object2.mass*(object1.position(1)-object2.position(1))/(R*R*R);
+//     F(2) = -4*PI*PI*object2.mass*(object1.position(2)-object2.position(2))/(R*R*R);
+       F = -4*PI*PI*object2.mass*(object1.position-object2.position)/(R*R*R);
  }
 
 
@@ -56,6 +57,7 @@ System::System()
  arma::Col<double>
  System::angularMomentum(Object movingObject)
  {
-    arma::Col<double> momentum = cross(movingObject.position, movingObject.mass*movingObject.velocity);// * AU * velocitySI;
+
+    arma::Col<double> momentum = arma::cross(movingObject.position, movingObject.mass*movingObject.velocity);// * AU * velocitySI;
     return momentum;
  }
