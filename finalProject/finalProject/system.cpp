@@ -2,20 +2,30 @@
 
 System::System()
     : numberOfObject(0)
+    , numberOfSystems(0)
  {
+    PI = 4*std::atan(1.0);
  }
 
  System::~System()
  {
  }
 
-
+//System is build so that every system needs a center object.
+//the fist added object is the center object, object and systems
+//are orbiting around
  void
  System::addObject(Object &newobject)
  {
-     PI = 4*std::atan(1.0);
      objectlist.push_back(newobject);
      numberOfObject = objectlist.size();
+ }
+
+ void
+ System::addSystem(System &newSubSystem)
+ {
+     systemlist.push_back(newSubSystem);
+     numberOfSystems = systemlist.size();
  }
 
 
@@ -60,4 +70,28 @@ System::System()
 
     arma::Col<double> momentum = arma::cross(movingObject.position, movingObject.mass*movingObject.velocity);// * AU * velocitySI;
     return momentum;
+ }
+ double
+ System::maxTimestep(Object movingObject)
+ {
+     Object centerObject = objectlist[0];
+     Distance d;
+     double R = d.twoObjects(movingObject.position, centerObject.position);
+     arma::Col<double> v = movingObject.velocity-centerObject.velocity;
+     double V = std::sqrt(arma::dot(v,v));
+     double dt = R/V;
+     return dt;
+ }
+
+ double
+ System::maxTimestep(System movingSystem)
+ {
+     Object centerObject = objectlist[0];
+     Object movingObject = movingSystem.objectlist[0];
+     Distance d;
+     double R = d.twoObjects(movingObject.position, centerObject.position);
+     arma::Col<double> v = movingObject.velocity-centerObject.velocity;
+     double V = std::sqrt(arma::dot(v,v));
+     double dt = R/V;
+     return dt;
  }

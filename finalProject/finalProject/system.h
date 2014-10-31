@@ -19,6 +19,8 @@ public:
 
     void addObject(Object &newobject);
 
+    void addSystem(System &newSubSystem);
+
     void force(Object &object1,
                Object &object2,
                arma::Col<double>& F);
@@ -28,12 +30,19 @@ public:
     double potentialEnergy(Object movingObject,
                            Object otherObject);
 
+    double maxTimestep(Object movingObject);
+
+    double maxTimestep(System movingSystem);
+
 
     arma::Col<double> angularMomentum(Object movingObject);
 
 
     int numberOfObject;
-   std::vector<Object> objectlist;
+    std::vector<Object> objectlist;
+
+    int numberOfSystems;
+    std::vector<System> systemlist;
 
 private:
    double PI;

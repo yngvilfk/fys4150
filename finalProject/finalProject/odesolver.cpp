@@ -287,45 +287,8 @@ OdeSolver::verlet(double time,
 
       mainbody.update(tempBody.position, tempBody.velocity);
 
-
-
     }
    }
    fout << "];" << "\n\n";
-//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-//   {
-//       Object thisobject = mysolarsystem.objectlist[j];
-//       fout << "plot (A(:," << 6*j+2 << "),A(:," << 6*j+3 <<"))" << "\n\n";
-//       fout << "legend('" << thisobject.name << "')" << "\n\n";
-//       fout << "hold on;" << "\n\n";
-//   }
-
-//   fout << "figure()" << "\n\n";
-//   for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-//   {
-//       Object thisobject = mysolarsystem.objectlist[j];
-//       fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+4 <<"))" << "\n\n";
-//       fout << "legend('" << thisobject.name << " kinetic energy" <<"')" << "\n\n";
-//       fout << "hold on;" << "\n\n";
-//   }
-//    fout << "figure" << "\n\n";
-
-//    for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-//    {
-//        Object thisobject = mysolarsystem.objectlist[j];
-//        fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+5 <<"))" << "\n\n";
-//        fout << "legend('" << thisobject.name << " potential energy" <<"')" << "\n\n";
-//        fout << "hold on;" << "\n\n";
-//    }
-//     fout << "figure" << "\n\n";
-
-//     for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-//     {
-//         Object thisobject = mysolarsystem.objectlist[j];
-//         fout << "plot (A(:," << 6*j+1 << "),A(:," << 6*j+6 <<"))" << "\n\n";
-//         fout << "legend('" << thisobject.name << " angular momentum" <<"')" << "\n\n";
-//         fout << "hold on;" << "\n\n";
-//     }
-//      fout << "figure" << "\n\n";
    fout.close();
 }
