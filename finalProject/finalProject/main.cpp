@@ -58,7 +58,7 @@ int main()
 //   std::cout << earth.velocity << std::endl;
 //   std::cout << sun.velocity << std::endl;
 
-   double year = 10.0;
+   double year = 80.0;
    double timestep = year*12;
 
    std::string rk4Name = "rk43D.m";
