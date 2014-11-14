@@ -21,6 +21,7 @@ Object::Object(double x,
    velocity(0) = vx;
    velocity(1) = vy;
    velocity(2) = vz;
+   acceleration = arma::zeros<arma::vec>(3);
 }
 
 
@@ -33,6 +34,7 @@ Object::Object(arma::Col<double> pos,
     , position(pos)
     , velocity(vel)
 {
+    acceleration = arma::zeros<arma::vec>(3);
 }
 
 Object::~Object()
@@ -46,3 +48,5 @@ Object::update(arma::Col<double> pos,
    position = pos;
    velocity = vel;
 }
+
+

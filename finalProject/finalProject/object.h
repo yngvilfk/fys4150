@@ -28,6 +28,7 @@ public:
 
     arma::Col<double> position;   //in astronomical units (AU)
     arma::Col<double> velocity;   //in AU/year
+    arma::Col<double> acceleration;
 };
 
 #endif // OBJECT_H

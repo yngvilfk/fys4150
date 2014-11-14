@@ -30,10 +30,6 @@ public:
     double potentialEnergy(Object movingObject,
                            Object otherObject);
 
-    double maxTimestep(Object movingObject);
-
-    double maxTimestep(System movingSystem);
-
 
     arma::Col<double> angularMomentum(Object movingObject);
 

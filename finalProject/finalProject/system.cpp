@@ -71,27 +71,4 @@ System::System()
     arma::Col<double> momentum = arma::cross(movingObject.position, movingObject.mass*movingObject.velocity);// * AU * velocitySI;
     return momentum;
  }
- double
- System::maxTimestep(Object movingObject)
- {
-     Object centerObject = objectlist[0];
-     Distance d;
-     double R = d.twoObjects(movingObject.position, centerObject.position);
-     arma::Col<double> v = movingObject.velocity-centerObject.velocity;
-     double V = std::sqrt(arma::dot(v,v));
-     double dt = R/V;
-     return dt;
- }
 
- double
- System::maxTimestep(System movingSystem)
- {
-     Object centerObject = objectlist[0];
-     Object movingObject = movingSystem.objectlist[0];
-     Distance d;
-     double R = d.twoObjects(movingObject.position, centerObject.position);
-     arma::Col<double> v = movingObject.velocity-centerObject.velocity;
-     double V = std::sqrt(arma::dot(v,v));
-     double dt = R/V;
-     return dt;
- }
