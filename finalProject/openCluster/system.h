@@ -18,26 +18,24 @@ public:
 
 
     void addObject(Object &newobject);
+    void removeObject(int i);
 
-    void addSystem(System &newSubSystem);
+    void setEpsilon(const double& epsilon) { epsilon_ = epsilon ;}
 
-//    void acceleration(Object &object1,
-//               Object &object2,
-//               arma::Col<double>& A);
     void acceleration(Object &mainObject,
                       int i);
 
-    double kineticEnergi(Object movingObject);
+    double kineticEnergi() const;
 
-    double potentialEnergy(Object movingObject,
-                           Object otherObject);
+    double potentialEnergy() const;
 
-    arma::Col<double> angularMomentum(Object movingObject);
+    double totalEnergy() const { return kineticEnergi()+potentialEnergy(); }
 
-    void solveRK4(double time,
-                  double timestep);
-    void solveVerlet(double time,
-                  double timestep);
+    double boundKineticEnergi(double limit) const;
+
+    double boundPotentialEnergy(double limit) const;
+
+    double boundTotalEnergy(double limit) const { return boundKineticEnergi(limit)+boundPotentialEnergy(limit); }
 
     int numberOfObject;
     std::vector<Object> objectlist;
@@ -47,6 +45,7 @@ public:
 
 private:
    double PI;
+   double epsilon_;
 };
 
 #endif // SYSTEM_H

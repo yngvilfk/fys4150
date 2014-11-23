@@ -14,24 +14,25 @@
 class OdeSolver
 {
 public:
-    OdeSolver(System &mysystem);
-    ~OdeSolver();
+      OdeSolver(System &mysystem);
 
-    void rk4(double time,
-             int nSteps,
-             std::string filename);
-    void verlet(double time,
-                int nSteps,
-                std::string filename);
 
-    System mysolarsystem;
+      void rk4(double time,
+               int nSteps,
+               std::string filename);
+      void verlet(double time,
+                  int nSteps,
+                  std::string filename);
+      int size() const {return mysolarsystem.numberOfObject;}
 
 protected:
 
 
 private:
-   double delta_t;
-   int n;
+      System mysolarsystem;
+      double delta_t;
+      int n;
+
 };
 
 #endif // ODESOLVER_H

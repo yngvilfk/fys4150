@@ -1,7 +1,7 @@
 #include "distance.h"
 
-double Distance::twoObjects(arma::Col<double>& object1,
-                            arma::Col<double>& object2)
+double Distance::twoObjects(const arma::Col<double>& object1,
+                            const arma::Col<double>& object2) const
 {
     /*function takes in the coordinates of two objects, object 1 and object 2:
     object 1 have the coordinates (x,y): (object1(0), object1(1))
@@ -16,3 +16,4 @@ double Distance::twoObjects(arma::Col<double>& object1,
     const double R = std::sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)+(z1-z2)*(z1-z2));
     return R;
 }
+

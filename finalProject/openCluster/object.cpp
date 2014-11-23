@@ -6,10 +6,8 @@ Object::Object(double x,
                double vx,
                double vy,
                double vz,
-               const double objectMass,
-               std::string objectName)
-    : name_(objectName)
-    , mass_(objectMass)
+               const double objectMass)
+    : mass_(objectMass)
 {
    arma::Col<double> createColDim(3);
 
@@ -27,10 +25,8 @@ Object::Object(double x,
 
 Object::Object(arma::Col<double> pos,
                arma::Col<double> vel,
-               const double objectMass,
-               std::string objectName)
-    : name_(objectName)
-    , mass_(objectMass)
+               const double objectMass)
+    : mass_(objectMass)
     , position_(pos)
     , velocity_(vel)
 {
@@ -40,16 +36,14 @@ Object::Object(arma::Col<double> pos,
 double
 Object::maxTimestep()
 {
-   timestep_ = 1/std::sqrt(arma::dot(acceleration_,acceleration_));
+   timestep_ = 1./std::sqrt(arma::dot(acceleration_,acceleration_));
    return timestep_;
 }
 
 void
 Object::newFile()
 {
-   std::string filename = "object_";
-   filename.append(name_);
-   filename.append(".m");
+   std::string filename = "object_.m";
    std::ofstream fout(filename.c_str());
    fout << "A = [";
    fout.close();
@@ -60,9 +54,7 @@ Object::newFile()
 void
 Object::addToFile()
 {
-   std::string filename = "object_";
-   filename.append(name_);
-   filename.append(".m");
+   std::string filename = "object_.m";
    std::ofstream fout(filename.c_str(), std::ios::app);
    fout << position_(0) << "\t\t" << position_(1) << "\t\t" << position_(2) << "\n";
    fout.close();
@@ -73,9 +65,7 @@ Object::addToFile()
 void
 Object::closeFile()
 {
-   std::string filename = "object_";
-   filename.append(name_);
-   filename.append(".m");
+   std::string filename = "object_.m";
    std::ofstream fout(filename.c_str(), std::ios::app);
    fout << "] \n";
 //   fout << "plot3(A(:,1),A(:,2),A(:,3))" ;

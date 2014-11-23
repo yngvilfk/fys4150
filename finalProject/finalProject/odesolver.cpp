@@ -5,11 +5,7 @@ OdeSolver::OdeSolver(System &mysystem)
 {
 }
 
-OdeSolver::~OdeSolver()
-{
-}
 
-//OdeSolver::rk4( std::string& fileName)
 void
 OdeSolver::rk4(double time,
                 int nSteps,
@@ -31,128 +27,80 @@ OdeSolver::rk4(double time,
 //   fout << "timelength = " << time << "\n";
    fout << "A = [ " ;
 
+   //set initial acceleration
+   for (int i = 0 ; i < size() ; ++i)
+   {
+      Object &mainbody = mysolarsystem.objectlist[i];
+
+      mysolarsystem.acceleration(mainbody, i);
+   }
 
    for ( int k = 0 ; k < n ; ++k )
    {
 
-      for (int i = 0 ; i < mysolarsystem.numberOfObject ; ++i)
+      for (int i = 0 ; i < size() ; ++i)
       {
-
          Object &mainbody = mysolarsystem.objectlist[i];
-         Object tempBody = mainbody;
-         arma::Col<double> force(3);
-         force.zeros();
-
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-
-            if (j != i)
-            {
-               arma::Col<double> F(3);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force += F;
-            }
-
-         } //end for
-
-
-
-         tempBody.position = mainbody.position;
-
+         System tempSystem = mysolarsystem;
+         Object &tempBody = tempSystem.objectlist[i];
 
          // Calculate k1
-         arma::Col<double> dPosdt, dVeldt;
-         dPosdt = tempBody.velocity;
-         dVeldt = force;
 
+         arma::Col<double> dPosdt, dVeldt;
+         dPosdt = tempBody.getVelocity();
+         dVeldt = tempBody.getAcceleration();
 
          k1Pos = dPosdt*delta_t;
          k1Vel = dVeldt*delta_t;
 
-
-        //er dette det samme som tempBody.position=mainpody.position+k1Pos*0.5
-         tempBody.position = mainbody.position + k1Pos*0.5;
-         tempBody.velocity = mainbody.velocity + k1Vel*0.5;
+         tempBody.setPosition(mainbody.getPosition() + k1Pos*0.5);
+         tempBody.setVelocity(mainbody.getVelocity() + k1Vel*0.5);
 
          // k2
-         force.zeros();
+         tempSystem.acceleration(tempBody, i);
 
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-
-            if (j != i)
-            {
-               arma::Col<double> F(3);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force += F;
-            }
-
-         } //end for
-
-         dPosdt = tempBody.velocity;
-         dVeldt = force;
+         dPosdt = tempBody.getVelocity();
+         dVeldt = tempBody.getAcceleration();
 
          k2Pos = dPosdt*delta_t;
          k2Vel = dVeldt*delta_t;
-         tempBody.position = mainbody.position + k2Pos*0.5;
-         tempBody.velocity = mainbody.velocity + k2Vel*0.5;
+         tempBody.setPosition(mainbody.getPosition() + k2Pos*0.5);
+         tempBody.setVelocity( mainbody.getVelocity() + k2Vel*0.5);
 
          // k3
-         force.zeros();
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
+         tempSystem.acceleration(tempBody, i);
 
-            if (j != i)
-            {
-               arma::Col<double> F(3);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force += F;
-            }
-         } //end for
-
-
-         dPosdt = tempBody.velocity;
-         dVeldt = force;
+         dPosdt = tempBody.getVelocity();
+         dVeldt = tempBody.getAcceleration();
 
          k3Pos = dPosdt*delta_t;
          k3Vel = dVeldt*delta_t;
-         tempBody.position = mainbody.position + k3Pos;
-         tempBody.velocity = mainbody.velocity + k3Vel;
+         tempBody.setPosition( mainbody.getPosition() + k3Pos);
+         tempBody.setVelocity( mainbody.getVelocity() + k3Vel);
 
 
          // k4
-         force.zeros();
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-         {
-            if (j != i)
-            {
-               arma::Col<double> F(3);
-               Object body = mysolarsystem.objectlist[j];
-               mysolarsystem.force(tempBody, body,F);
-               force += F;
-            }
-         } //end for
+         tempSystem.acceleration(tempBody, i);
 
-         dPosdt = tempBody.velocity;
-         dVeldt = force;
+         dPosdt = tempBody.getVelocity();
+         dVeldt = tempBody.getAcceleration();
 
          k4Pos = dPosdt*delta_t;
          k4Vel = dVeldt*delta_t;
 
-         tempBody.position = mainbody.position + 1.0/6.0 * (k1Pos + 2.*k2Pos + 2.*k3Pos + k4Pos);
-         tempBody.velocity = mainbody.velocity + 1.0/6.0 * (k1Vel + 2.*k2Vel + 2.*k3Vel + k4Vel);
+         tempBody.setPosition( mainbody.getPosition() + 1.0/6.0 * (k1Pos + 2.*k2Pos + 2.*k3Pos + k4Pos));
+         tempBody.setVelocity( mainbody.getVelocity() + 1.0/6.0 * (k1Vel + 2.*k2Vel + 2.*k3Vel + k4Vel));
 
-         mainbody.update(tempBody.position, tempBody.velocity);
+         mainbody.setPosition(tempBody.getPosition());
+         mainbody.setVelocity(tempBody.getVelocity());
+         mysolarsystem.acceleration(mainbody, i);
 
          double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
          double potentialEnergy = 0.0;
          arma::Col<double> angularMomentum = mysolarsystem.angularMomentum(mainbody);
 
 
-         for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+         for ( int j = 0 ; j < size() ; ++j)
          {
             if (j != i)
             {
@@ -163,17 +111,18 @@ OdeSolver::rk4(double time,
 
          } //end for
 
-         if (i == 0)
-         {
-            arma::Col<double> temp(3);
-            temp.zeros();
-            tempBody.velocity = temp;
-            tempBody.position = temp;
-         }
+//         if (i == 0)
+//         {
+//            arma::Col<double> temp(3);
+//            temp.zeros();
+//            tempBody.setVelocity( temp);
+//            tempBody.setPosition( temp);
+//         }
          double ttotalEnergy = kineticEnergi+potentialEnergy;
 
-         fout << k*delta_t<<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << tempBody.position(2) << "\t\t" << ttotalEnergy << "\t\t"; //<<  angularMomentum << "\t\t";
-         if (i == mysolarsystem.numberOfObject - 1)
+         fout << k*delta_t<<"\t\t" << tempBody.getPosition()(0) << "\t\t" << tempBody.getPosition()(1)
+               << "\t\t" << tempBody.getPosition()(2) << "\t\t" << ttotalEnergy << "\t\t"; //<<  angularMomentum << "\t\t";
+         if (i == size() - 1)
          {
             fout << "\n";
          }
@@ -192,6 +141,9 @@ OdeSolver::rk4(double time,
    fout.close();
 
 }
+
+
+
 
 void
 OdeSolver::verlet(double time,
@@ -212,56 +164,39 @@ OdeSolver::verlet(double time,
 //   fout << "timelength = " << time << "\n";
    fout << "A = [ " ;
 
+   //set initial acceleration
+   for (int i = 0 ; i < size() ; ++i)
+   {
+      Object &mainbody = mysolarsystem.objectlist[i];
 
+      mysolarsystem.acceleration(mainbody, i);
+   }
 
    for (int k = 1 ; k<=n ; ++k)
    {
 
-       for ( int i = 0 ; i < mysolarsystem.numberOfObject ; ++i)
-       {
-          arma::Col<double> force(3);
-          Object &mainbody = mysolarsystem.objectlist[i];
-          Object tempBody = mainbody;
-          force.zeros();
-
-          for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-          {
-             if (j != i)
-             {
-                arma::Col<double> F(3);
-                Object body = mysolarsystem.objectlist[j];
-                mysolarsystem.force(tempBody, body,F);
-                force += F;
-             }
-          } //end for
-
-      tempBody.position = mainbody.position+mainbody.velocity*delta_t +force*delta_t*delta_t*0.5; //pos_i+1
-
-      arma::Col<double> newforce(3);
-      newforce.zeros();
-
-      for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
+      for ( int i = 0 ; i < size() ; ++i)
       {
+         Object &mainbody = mysolarsystem.objectlist[i];
+         System tempSystem = mysolarsystem;
+         Object &tempBody = tempSystem.objectlist[i];
 
-         if (j != i)
+         tempBody.setPosition(mainbody.getPosition()+mainbody.getVelocity()*delta_t +
+                              mainbody.getAcceleration()*delta_t*delta_t*0.5); //pos_i+1
+
+         tempSystem.acceleration(tempBody, i);
+
+         tempBody.setVelocity(mainbody.getVelocity() + 0.5*
+                              (mainbody.getAcceleration()+tempBody.getAcceleration())*delta_t); //vel_i+1
+
+
+         double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
+         double potentialEnergy = 0.0;
+         arma::Col<double> angularMomentum = mysolarsystem.angularMomentum(mainbody);
+
+
+         for ( int j = 0 ; j < size() ; ++j)
          {
-            arma::Col<double> F(3);
-            Object body = mysolarsystem.objectlist[j];
-            mysolarsystem.force(tempBody, body,F);
-            newforce += F;
-         }
-      } //end for
-
-      tempBody.velocity = mainbody.velocity + 0.5*(force+newforce)*delta_t; //vel_i+1
-
-
-      double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
-      double potentialEnergy = 0.0;
-      arma::Col<double> angularMomentum = mysolarsystem.angularMomentum(mainbody);
-
-
-      for ( int j = 0 ; j < mysolarsystem.numberOfObject ; ++j)
-      {
          if (j != i)
          {
             Object body = mysolarsystem.objectlist[j];
@@ -269,25 +204,28 @@ OdeSolver::verlet(double time,
             potentialEnergy += energy;
          }
 
-      } //end for
-      if (i == 0)
-      {
-         arma::Col<double> temp(3);
-         temp.zeros();
-         tempBody.velocity = temp;
-         tempBody.position = temp;
+         } //end for
+         if (i == 0)
+         {
+            arma::Col<double> temp(3);
+            temp.zeros();
+            tempBody.setVelocity( temp);
+            tempBody.setVelocity( temp);
+         }
+         double totalEnergy = potentialEnergy+kineticEnergi;
+
+         fout << k*delta_t << "\t\t" << tempBody.getPosition()(0) << "\t\t" << tempBody.getPosition()(1) << "\t\t"
+              << tempBody.getPosition()(2) << "\t\t"<< totalEnergy << "\t\t";// << angularMomentum << "\t\t";
+         if (i == size() - 1)
+         {
+            fout << "\n";
+         }
+
+         mainbody.setPosition(tempBody.getPosition());
+         mainbody.setVelocity(tempBody.getVelocity());
+         mysolarsystem.acceleration(mainbody, i);
+
       }
-    double totalEnergy = potentialEnergy+kineticEnergi;
-
-      fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << tempBody.position(2) << "\t\t"<< totalEnergy << "\t\t";// << angularMomentum << "\t\t";
-      if (i == mysolarsystem.numberOfObject - 1)
-      {
-         fout << "\n";
-      }
-
-      mainbody.update(tempBody.position, tempBody.velocity);
-
-    }
    }
    fout << "];" << "\n\n";
    fout.close();

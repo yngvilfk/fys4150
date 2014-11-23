@@ -14,13 +14,11 @@ public:
            double vx,
            double vy,
            double vz,
-           const double objectMass,
-           std::string objectName);
+           const double objectMass);
 
     Object(arma::Col<double> pos,
            arma::Col<double> vel,
-           const double objectMass,
-           std::string objectName);
+           const double objectMass);
 
     void update(arma::Col<double> pos,
                 arma::Col<double> vel);
@@ -31,7 +29,6 @@ public:
     void                     setAcceleration(const arma::Col<double>& acceleration) { acceleration_ = acceleration ;}
     const arma::Col<double>& getAcceleration() const {return acceleration_;}
     const double& getMass() const {return mass_;}
-    const std::string& getName() const {return name_;}
     double maxTimestep();
     void newFile();
     void addToFile();
@@ -40,7 +37,6 @@ public:
 protected:
 
 private:
-    std::string name_;
     double      mass_;   //in solar masse
 
     arma::Col<double> position_;   //in astronomical units (AU)
@@ -51,4 +47,3 @@ private:
 };
 
 #endif // OBJECT_H
-
