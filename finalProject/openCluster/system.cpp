@@ -43,7 +43,7 @@ System::System()
           position2 = tempObject.getPosition();
           double R = d.twoObjects(position1, position2);
           tempAcceleration = -4*PI*PI*tempObject.getMass()*(mainObject.getPosition()-tempObject.getPosition())/
-                               (R*(R*R+epsilon_*epsilon_)*6.3241e4);//[ly/yr]
+                               (R*(R*R+epsilon_*epsilon_));// /6.3241e4);//[ly/yr]
           acceleration += tempAcceleration;
        } //end if
     } //end for

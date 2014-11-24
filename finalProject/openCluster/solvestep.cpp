@@ -1,5 +1,6 @@
 #include <sstream>
 #include <omp.h>
+#include <time.h>
 #include "solvestep.h"
 
 SolveStep::SolveStep(System &mysystem)
@@ -13,7 +14,9 @@ SolveStep::solve(double timestep,
                  std::string name,
                  std::string method)
 {
-   omp_set_num_threads(8);
+   std::string add = "rk4";
+   clock_t start, finish;
+//   omp_set_num_threads(8);
    System newsystem = mysolarsystem_;
    int n = time/timestep;
    double minTime = timestep;
@@ -34,34 +37,45 @@ SolveStep::solve(double timestep,
    energy << "A = [";
    for (int k = 0 ; k < n ; ++k)
    {
-      name.append("t");
+//      name.append("t");
+//
+//      std::string filename = name;
+//      filename.append(".m");
+//      std::ofstream fout(filename.c_str());
+//      fout << "A = [";
       t += timestep;
-      std::string filename = name;
-      filename.append(".m");
-      std::ofstream fout(filename.c_str());
-      fout << "A = [";
-#pragma omp parallel for
+//#pragma omp parallel for
       for (int i = 0 ; i < size() ; ++i)
       {
          Object &mainbody = newsystem.objectlist[i];
          double dt = timestep;
          int j = 0;
 //         std::cout << mainbody.getAcceleration() << std::endl;
-         while(dt > mainbody.maxTimestep())
-         {
-               dt = dt/2.0;
+//         while(dt > mainbody.maxTimestep())
+//         {
+//               dt = dt/2.0;
 
-               j += 1;
-         }
+//               j += 1;
+//         }
          for (int kk = 0 ; kk < std::pow(2,j); ++kk)
          {
             if (method == "rk4")
             {
+//               start = clock(); //start timer
                rk4Step(dt, i, mainbody);
+//               finish = clock(); //stop timer
+//               std::cout << "time one rk4 step: " <<
+//                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+               mainbody.addToFile(name);
             }
             else if(method == "verlet")
             {
+//               start = clock(); //start timer
                verlet(dt, i, mainbody);
+//               finish = clock(); //stop timer
+//               std::cout << "time one verlet step: " <<
+//                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+               mainbody.addToFile(name);
             }
             else
             {
@@ -69,35 +83,35 @@ SolveStep::solve(double timestep,
 //               return 1;
             }
 
-            if(dt < minTime)
-            {
-               minTime = dt;
-            }
+//            if(dt < minTime)
+//            {
+//               minTime = dt;
+//            }
 
          }
 
       }
       mysolarsystem_ = newsystem;
 
-      for (int i = 0 ; i < size() ; ++i)
-      {
-         Object &mainbody = mysolarsystem_.objectlist[i];
-         position = mainbody.getPosition();
-         double dist = d.twoObjects(position,center) ;
-         if(dist < limit)
-         {
-            fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
-                 << "\t\t" << mainbody.getPosition()(2) << "\n";
-         }
-         else
-         {
-            mysolarsystem_.removeObject(i);
-//            i-=1;
-         }
-      }
-      fout << "] \n";
-      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
-      fout.close();
+//      for (int i = 0 ; i < size() ; ++i)
+//      {
+//         Object &mainbody = mysolarsystem_.objectlist[i];
+//         position = mainbody.getPosition();
+//         double dist = d.twoObjects(position,center) ;
+//         if(dist < limit)
+//         {
+//            fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
+//                 << "\t\t" << mainbody.getPosition()(2) << "\n";
+//         }
+//         else
+//         {
+//            mysolarsystem_.removeObject(i);
+// //           i-=1;
+//         }
+//      }
+//      fout << "] \n";
+//      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
+//      fout.close();
 
       bound << t << "\t\t" << mysolarsystem_.boundTotalEnergy(limit) << "\n";
 
@@ -105,11 +119,11 @@ SolveStep::solve(double timestep,
 
    }
    energy << "] \n";
-   energy << "plot(A(:,1), A(:,2))";
+//   energy << "plot(A(:,1), A(:,2))";
    energy.close();
 
    bound << "] \n";
-   bound << "plot(A(:,1), A(:,2))";
+//   bound << "plot(A(:,1), A(:,2))";
    bound.close();
    for (int i = 0 ; i < size() ; ++i)
    {

@@ -10,7 +10,7 @@ CreateClass::CreateClass()
 System
 CreateClass::randomSystem(int N)
 {
-   double PI = 4*std::atan(1.0)
+   double PI = 4*std::atan(1.0);
    System newSystem;
    long value = -2;
    long value2 = -3;

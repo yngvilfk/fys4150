@@ -1,32 +1,22 @@
 #include "object.h"
 
-Object::Object(double x,
-               double y,
-               double z,
-               double vx,
-               double vy,
-               double vz,
-               const double objectMass)
-    : mass_(objectMass)
-{
-   arma::Col<double> createColDim(3);
-
-   position_ = createColDim;
-   velocity_ = createColDim;
-   position_(0) = x;
-   position_(1) = y;
-   position_(2) = z;
-   velocity_(0) = vx;
-   velocity_(1) = vy;
-   velocity_(2) = vz;
-   acceleration_ = arma::zeros<arma::vec>(3);
-}
-
 
 Object::Object(arma::Col<double> pos,
                arma::Col<double> vel,
                const double objectMass)
     : mass_(objectMass)
+    , position_(pos)
+    , velocity_(vel)
+{
+    acceleration_ = arma::zeros<arma::vec>(3);
+}
+
+Object::Object(arma::Col<double> pos,
+               arma::Col<double> vel,
+               const double objectMass,
+               std::string objectName)
+    : name_(objectName)
+    , mass_(objectMass)
     , position_(pos)
     , velocity_(vel)
 {
@@ -41,9 +31,13 @@ Object::maxTimestep()
 }
 
 void
-Object::newFile()
+Object::newFile(std::string addition)
 {
-   std::string filename = "object_.m";
+
+   std::string filename = "object_";
+   filename.append(name_);
+   filename.append(addition);
+   filename.append(".m");
    std::ofstream fout(filename.c_str());
    fout << "A = [";
    fout.close();
@@ -52,9 +46,12 @@ Object::newFile()
 
 
 void
-Object::addToFile()
+Object::addToFile(std::string addition)
 {
-   std::string filename = "object_.m";
+   std::string filename = "object_";
+   filename.append(name_);
+   filename.append(addition);
+   filename.append(".m");
    std::ofstream fout(filename.c_str(), std::ios::app);
    fout << position_(0) << "\t\t" << position_(1) << "\t\t" << position_(2) << "\n";
    fout.close();
@@ -63,9 +60,12 @@ Object::addToFile()
 
 
 void
-Object::closeFile()
+Object::closeFile(std::string addition)
 {
-   std::string filename = "object_.m";
+   std::string filename = "object_";
+   filename.append(name_);
+   filename.append(addition);
+   filename.append(".m");
    std::ofstream fout(filename.c_str(), std::ios::app);
    fout << "] \n";
 //   fout << "plot3(A(:,1),A(:,2),A(:,3))" ;
