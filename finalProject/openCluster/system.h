@@ -23,7 +23,10 @@ public:
     void setEpsilon(const double& epsilon) { epsilon_ = epsilon ;}
 
     void acceleration(Object &mainObject,
-                      int i);
+                      int i,
+                      double time,
+                      std::string length);
+    double maxTimestep(int i);
 
     double kineticEnergi() const;
 

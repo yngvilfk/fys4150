@@ -27,7 +27,9 @@ System::System()
 
  void
  System::acceleration(Object &mainObject,
-                      int i)
+                      int i,
+                      double time,
+                      std::string length)
  {
     arma::Col<double> tempAcceleration(3);
     arma::Col<double> acceleration(3);
@@ -40,14 +42,73 @@ System::System()
           Distance d;
           arma::Col<double> position1, position2;
           position1 = mainObject.getPosition();
-          position2 = tempObject.getPosition();
+          position2 = tempObject.getPosition()+ time*tempObject.getVelocity();
           double R = d.twoObjects(position1, position2);
           tempAcceleration = -4*PI*PI*tempObject.getMass()*(mainObject.getPosition()-tempObject.getPosition())/
                                (R*(R*R+epsilon_*epsilon_));// /6.3241e4);//[ly/yr]
+          if (length == "ly")
+          {
+             tempAcceleration = tempAcceleration/6.3241e4;
+          }
+
           acceleration += tempAcceleration;
        } //end if
     } //end for
     mainObject.setAcceleration(acceleration);
+ }
+
+ double
+ System::maxTimestep(int i)
+ {
+    Distance d;
+    const Object mainObject = objectlist[i];
+    int k;
+    if (i == 0)
+    {
+       k=1;
+    }
+    else
+    {
+       k=0;
+    }
+    Object tempObject = objectlist[k];
+    arma::Col<double> position1(3), position2(3);
+    arma::Col<double> mainVel = mainObject.getVelocity();
+
+    position1 = mainObject.getPosition();
+    position2 = tempObject.getPosition();//+ time*tempObject.getVelocity();
+
+    double R = d.twoObjects(position1, position2);
+    arma::Col<double> tempVel = tempObject.getVelocity()-mainVel;
+    double V = std::sqrt(arma::dot(tempVel,tempVel));
+    double maxTime;
+    if (V>1e-5)
+    {
+       maxTime = R/V;
+    }
+    else
+    {
+       maxTime = R/1e-5;
+    }
+    double temptime;
+
+    for (int j = 1; j < numberOfObject; ++j)
+    {
+       if (j!=i)
+       {
+          tempObject = objectlist[j];
+          position2 = tempObject.getPosition();//+ time*tempObject.getVelocity();
+          R = d.twoObjects(position1, position2);
+          tempVel = tempObject.getVelocity()-mainVel;
+          V = std::sqrt(arma::dot(tempVel,tempVel));
+          temptime = R/V;
+          if (temptime<maxTime && V<1e-5)
+          {
+             maxTime = temptime;
+          }
+       } //end if
+    } //end for
+    return maxTime;
  }
 
 

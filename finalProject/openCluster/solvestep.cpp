@@ -12,20 +12,21 @@ int
 SolveStep::solve(double timestep,
                  double time,
                  std::string name,
-                 std::string method)
+                 std::string method,
+                 std::string length)
 {
-   std::string add = "rk4";
-   clock_t start, finish;
+
+//   clock_t start, finish;
 //   omp_set_num_threads(8);
    System newsystem = mysolarsystem_;
    int n = time/timestep;
    double minTime = timestep;
-   double limit = 40;
+   double limit = 1000;
    Distance d;
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = newsystem.objectlist[i];
-      newsystem.acceleration(mainbody, i);
+      newsystem.acceleration(mainbody, i, 0.0,length);
 
    }
    arma::Col<double> center(3), position(3);
@@ -37,81 +38,95 @@ SolveStep::solve(double timestep,
    energy << "A = [";
    for (int k = 0 ; k < n ; ++k)
    {
-//      name.append("t");
-//
-//      std::string filename = name;
-//      filename.append(".m");
-//      std::ofstream fout(filename.c_str());
-//      fout << "A = [";
       t += timestep;
+      name.append("t");
+      std::string filename = name;
+      filename.append(".m");
+      std::ofstream fout(filename.c_str());
+      fout << "t = " << t << "\n A = [";
+
+      double addtime = 0.0;
 //#pragma omp parallel for
       for (int i = 0 ; i < size() ; ++i)
       {
          Object &mainbody = newsystem.objectlist[i];
          double dt = timestep;
          int j = 0;
-//         std::cout << mainbody.getAcceleration() << std::endl;
-//         while(dt > mainbody.maxTimestep())
-//         {
-//               dt = dt/2.0;
+         double maxTimestep;
 
-//               j += 1;
-//         }
+         if (mainbody.maxTimestep() < mysolarsystem_.maxTimestep(i))
+         {
+            maxTimestep = mainbody.maxTimestep();
+         }
+         else
+         {
+            maxTimestep = mysolarsystem_.maxTimestep(i);
+         }
+
+         std::cout << maxTimestep << std::endl;
+         while(dt > maxTimestep)
+         {
+               dt = dt/2.0;
+
+               j += 1;
+         }
+
+
          for (int kk = 0 ; kk < std::pow(2,j); ++kk)
          {
             if (method == "rk4")
             {
 //               start = clock(); //start timer
-               rk4Step(dt, i, mainbody);
+               rk4Step(dt, i, mainbody, addtime, length);
 //               finish = clock(); //stop timer
 //               std::cout << "time one rk4 step: " <<
 //                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
-               mainbody.addToFile(name);
+//               mainbody.addToFile(name);
+               addtime += dt;
             }
             else if(method == "verlet")
             {
 //               start = clock(); //start timer
-               verlet(dt, i, mainbody);
+               verlet(dt, i, mainbody, addtime, length);
 //               finish = clock(); //stop timer
 //               std::cout << "time one verlet step: " <<
 //                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
-               mainbody.addToFile(name);
+//               mainbody.addToFile(name);
+               addtime += dt;
             }
             else
             {
                std::cout << "method must be 'verlet' or 'rk4'" << std::endl;
-//               return 1;
             }
 
 //            if(dt < minTime)
 //            {
 //               minTime = dt;
 //            }
-
          }
 
       }
       mysolarsystem_ = newsystem;
 
-//      for (int i = 0 ; i < size() ; ++i)
-//      {
-//         Object &mainbody = mysolarsystem_.objectlist[i];
-//         position = mainbody.getPosition();
-//         double dist = d.twoObjects(position,center) ;
-//         if(dist < limit)
-//         {
-//            fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
-//                 << "\t\t" << mainbody.getPosition()(2) << "\n";
-//         }
-//         else
-//         {
-//            mysolarsystem_.removeObject(i);
-// //           i-=1;
-//         }
-//      }
-//      fout << "] \n";
-//      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
-//      fout.close();
+      for (int i = 0 ; i < size() ; ++i)
+      {
+         Object &mainbody = mysolarsystem_.objectlist[i];
+         position = mainbody.getPosition();
+         double dist = d.twoObjects(position,center) ;
+         if(dist < limit)
+         {
+            fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
+                 << "\t\t" << mainbody.getPosition()(2) << "\n";
+         }
+         else
+         {
+            mysolarsystem_.removeObject(i);
+ //           i-=1;
+         }
+      }
+      fout << "] \n";
+      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
+      fout.close();
 
       bound << t << "\t\t" << mysolarsystem_.boundTotalEnergy(limit) << "\n";
 
@@ -128,7 +143,7 @@ SolveStep::solve(double timestep,
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = mysolarsystem_.objectlist[i];
-      mysolarsystem_.acceleration(mainbody, i);
+      mysolarsystem_.acceleration(mainbody, i, 0.0,length);
    }
    std::cout << minTime << std::endl;
    return 0;
@@ -136,8 +151,10 @@ SolveStep::solve(double timestep,
 
 void
 SolveStep::rk4Step(double delta_t,
-               int objectNumber,
-               Object &mainbody)
+                   int objectNumber,
+                   Object &mainbody,
+                   double addtime,
+                   std::string length)
 {
    int i = objectNumber;
    System tempSystem = mysolarsystem_;
@@ -157,7 +174,7 @@ SolveStep::rk4Step(double delta_t,
    tempBody.setVelocity(mainbody.getVelocity() + k1Vel*0.5);
 
    // k2
-   tempSystem.acceleration(tempBody, i);
+   tempSystem.acceleration(tempBody, i, addtime,length);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -168,7 +185,7 @@ SolveStep::rk4Step(double delta_t,
    tempBody.setVelocity( mainbody.getVelocity() + k2Vel*0.5);
 
    // k3
-   tempSystem.acceleration(tempBody, i);
+   tempSystem.acceleration(tempBody, i, addtime,length);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -180,7 +197,7 @@ SolveStep::rk4Step(double delta_t,
 
 
    // k4
-   tempSystem.acceleration(tempBody, i);
+   tempSystem.acceleration(tempBody, i, addtime,length);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -193,14 +210,16 @@ SolveStep::rk4Step(double delta_t,
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
-   mysolarsystem_.acceleration(mainbody, i);
+   mysolarsystem_.acceleration(mainbody, i, addtime,length);
 
 }
 
 void
 SolveStep::verlet(double delta_t,
                   int objectNumber,
-                  Object &mainbody)
+                  Object &mainbody,
+                  double addtime,
+                  std::string length)
 {
    int i = objectNumber;
 
@@ -210,15 +229,12 @@ SolveStep::verlet(double delta_t,
    tempBody.setPosition(mainbody.getPosition()+mainbody.getVelocity()*delta_t +
                         mainbody.getAcceleration()*delta_t*delta_t*0.5); //pos_i+1
 
-   tempSystem.acceleration(tempBody, i);
+   tempSystem.acceleration(tempBody, i, addtime,length);
 
    tempBody.setVelocity(mainbody.getVelocity() + 0.5*
                         (mainbody.getAcceleration()+tempBody.getAcceleration())*delta_t); //vel_i+1
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
-   mysolarsystem_.acceleration(mainbody, i);
-
-
-
+   mysolarsystem_.acceleration(mainbody, i, addtime,length);
    }

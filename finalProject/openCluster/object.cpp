@@ -69,6 +69,5 @@ Object::closeFile(std::string addition)
    std::ofstream fout(filename.c_str(), std::ios::app);
    fout << "] \n";
 //   fout << "plot3(A(:,1),A(:,2),A(:,3))" ;
-   fout << "plot(A(:,1),A(:,2))" ;
    fout.close();
 }

@@ -13,17 +13,19 @@ RandomGenerator::randomSystem(int N,
    long value = -2;
    long value2 = -3;
    long value3 = -4;
+   long value4 = -5;
    for (int i = 0; i < N; ++i)
    {
       double theta = ran2(value)*2*PI;
       double phi = ran2(value2)*PI;
+      double R = ran2(value4)*R0;
       double mass = gaussian_deviate(value3)+10.0;
 
       arma::Col<double> position(3), velocity(3);
       velocity.zeros();
-      position(0) = R0*std::sin(phi)*std::cos(theta);
-      position(1) = R0*std::sin(phi)*std::sin(theta);
-      position(2) = R0*std::cos(phi);
+      position(0) = R*std::sin(phi)*std::cos(theta);
+      position(1) = R*std::sin(phi)*std::sin(theta);
+      position(2) = R*std::cos(phi);
       Object newObject(position,velocity,mass);
       newsystem.addObject(newObject);
    }
