@@ -8,7 +8,7 @@ int main()
 {
    double PI = 4*std::atan(1.0);
    clock_t start, finish;
-   std::string length = "AU";
+   std::string dimension = "AU"; //can be 'AU' or 'ly'
 
 //-------------------------------------------------------------
    /* problem a)
@@ -50,7 +50,7 @@ int main()
 //   sun.newFile(nameAdd);
 //   SolveStep solver(solarsystem);
 
-//   solver.solve(0.01,0.05,"rk4_","rk4", length);
+//   solver.solve(0.01,0.05,"rk4_","rk4", dimension);
 
 //   earth.closeFile(nameAdd);
 //   sun.closeFile(nameAdd);
@@ -109,7 +109,7 @@ int main()
 //   double timestep = 1.0;
 
 //   start = clock(); //start timer
-//   solverAdapt.solve(timestep,4.0,nameAdd,"verlet", length);
+//   solverAdapt.solve(timestep,4.0,nameAdd,"verlet", dimension);
 //   finish = clock(); //stop timer
 //   std::cout << "Simulation time: " <<
 //                static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
@@ -124,17 +124,19 @@ int main()
        * in Solvestep that saves every position for every particle
        * is commented out during these calculations. */
    //-------------------------------------------------------------
-   length = "ly";
+   dimension = "ly";
    RandomGenerator generate;
    double R0 = 20;
-   System mysystem = generate.randomSystem(100, R0);
-   mysystem.setEpsilon(0.2);
+   double epsilon = 0.0;
+   int N = 100;
+   System mysystem = generate.randomSystem(N, R0);
+   mysystem.setEpsilon(epsilon);
    SolveStep solver(mysystem);
-   double timestep = 10.;
-   double simulationTime = 100.;
+   double timestep = 49.0;
+   double simulationTime = 399.0;
    std::string fileName = "solve_";
-   std::string method = "rk4";
-   solver.solve(timestep, simulationTime, fileName, method, length);
+   std::string method = "verlet";
+   solver.solve(timestep, simulationTime, fileName, method, dimension);
 
    std::ofstream fout("start.m");
    fout << "A = [";

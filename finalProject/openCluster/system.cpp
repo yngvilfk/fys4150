@@ -29,7 +29,7 @@ System::System()
  System::acceleration(Object &mainObject,
                       int i,
                       double time,
-                      std::string length)
+                      std::string dimension)
  {
     arma::Col<double> tempAcceleration(3);
     arma::Col<double> acceleration(3);
@@ -45,13 +45,20 @@ System::System()
           position2 = tempObject.getPosition()+ time*tempObject.getVelocity();
           double R = d.twoObjects(position1, position2);
           tempAcceleration = -4*PI*PI*tempObject.getMass()*(mainObject.getPosition()-tempObject.getPosition())/
-                               (R*(R*R+epsilon_*epsilon_));// /6.3241e4);//[ly/yr]
-          if (length == "ly")
+                               (R*(R*R+epsilon_*epsilon_));// ly/yr]
+          if (dimension == "ly")
           {
-             tempAcceleration = tempAcceleration/6.3241e4;
+             acceleration += tempAcceleration/6.3241e4;
+          }
+          else if(dimension == "AU")
+          {
+             acceleration += tempAcceleration;
+          }
+          else
+          {
+             std::cout << "dimension must be AU or ly"<< std::endl;
           }
 
-          acceleration += tempAcceleration;
        } //end if
     } //end for
     mainObject.setAcceleration(acceleration);
@@ -140,9 +147,10 @@ System::System()
           {
              const Object movingObject = objectlist[i];
              const Object otherObject  = objectlist[j];
-             const double R = d.twoObjects(movingObject.getPosition(), otherObject.getPosition());
+             const double R = d.twoObjects(movingObject.getPosition(),
+                                           otherObject.getPosition());
              energy +=  4 * PI * PI * otherObject.getMass() *
-                   movingObject.getMass() /R;
+                   movingObject.getMass()/R;
           }
        }
     }

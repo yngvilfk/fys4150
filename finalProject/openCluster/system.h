@@ -25,7 +25,7 @@ public:
     void acceleration(Object &mainObject,
                       int i,
                       double time,
-                      std::string length);
+                      std::string dimension);
     double maxTimestep(int i);
 
     double kineticEnergi() const;

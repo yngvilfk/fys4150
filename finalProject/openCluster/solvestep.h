@@ -21,19 +21,19 @@ class SolveStep
                 double time,
                 std::string name,
                 std::string method,
-                std::string length);
+                std::string dimension);
 
       void rk4Step(double delta_t,
                    int objectNumber,
                    Object &mainbody,
                    double addtime,
-                   std::string length);
+                   std::string dimension);
 
       void verlet(double delta_t,
                   int objectNumber,
                   Object &mainbody,
                   double addtime,
-                  std::string length);
+                  std::string dimension);
 
       int size() const {return mysolarsystem_.numberOfObject;}
 

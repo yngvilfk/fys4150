@@ -13,7 +13,7 @@ SolveStep::solve(double timestep,
                  double time,
                  std::string name,
                  std::string method,
-                 std::string length)
+                 std::string dimension)
 {
 
 //   clock_t start, finish;
@@ -21,12 +21,12 @@ SolveStep::solve(double timestep,
    System newsystem = mysolarsystem_;
    int n = time/timestep;
    double minTime = timestep;
-   double limit = 1000;
+   double limit = 200;
    Distance d;
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = newsystem.objectlist[i];
-      newsystem.acceleration(mainbody, i, 0.0,length);
+      newsystem.acceleration(mainbody, i, 0.0,dimension);
 
    }
    arma::Col<double> center(3), position(3);
@@ -44,6 +44,7 @@ SolveStep::solve(double timestep,
       filename.append(".m");
       std::ofstream fout(filename.c_str());
       fout << "t = " << t << "\n A = [";
+      std::cout << "t = " << t << std::endl;
 
       double addtime = 0.0;
 //#pragma omp parallel for
@@ -54,13 +55,17 @@ SolveStep::solve(double timestep,
          int j = 0;
          double maxTimestep;
 
-         if (mainbody.maxTimestep() < mysolarsystem_.maxTimestep(i))
+         if (mainbody.maxTimestep() < mysolarsystem_.maxTimestep(i) && mainbody.maxTimestep() > 1e-4)
          {
             maxTimestep = mainbody.maxTimestep();
          }
-         else
+         else if (mainbody.maxTimestep() > mysolarsystem_.maxTimestep(i) && mysolarsystem_.maxTimestep(i) > 1e-4)
          {
             maxTimestep = mysolarsystem_.maxTimestep(i);
+         }
+         else
+         {
+            maxTimestep = 1e-2;
          }
 
          std::cout << maxTimestep << std::endl;
@@ -77,7 +82,7 @@ SolveStep::solve(double timestep,
             if (method == "rk4")
             {
 //               start = clock(); //start timer
-               rk4Step(dt, i, mainbody, addtime, length);
+               rk4Step(dt, i, mainbody, addtime, dimension);
 //               finish = clock(); //stop timer
 //               std::cout << "time one rk4 step: " <<
 //                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
@@ -87,7 +92,7 @@ SolveStep::solve(double timestep,
             else if(method == "verlet")
             {
 //               start = clock(); //start timer
-               verlet(dt, i, mainbody, addtime, length);
+               verlet(dt, i, mainbody, addtime, dimension);
 //               finish = clock(); //stop timer
 //               std::cout << "time one verlet step: " <<
 //                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
@@ -124,7 +129,7 @@ SolveStep::solve(double timestep,
  //           i-=1;
          }
       }
-      fout << "] \n";
+      fout << "]; \n";
       fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
       fout.close();
 
@@ -133,19 +138,19 @@ SolveStep::solve(double timestep,
       energy << t << "\t\t" << mysolarsystem_.totalEnergy() << "\n";
 
    }
-   energy << "] \n";
+   energy << "]; \n";
 //   energy << "plot(A(:,1), A(:,2))";
    energy.close();
 
-   bound << "] \n";
+   bound << "]; \n";
 //   bound << "plot(A(:,1), A(:,2))";
    bound.close();
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = mysolarsystem_.objectlist[i];
-      mysolarsystem_.acceleration(mainbody, i, 0.0,length);
+      mysolarsystem_.acceleration(mainbody, i, 0.0,dimension);
    }
-   std::cout << minTime << std::endl;
+   std::cout << mysolarsystem_.numberOfObject <<"or: "<< size() << std::endl;
    return 0;
 }
 
@@ -154,7 +159,7 @@ SolveStep::rk4Step(double delta_t,
                    int objectNumber,
                    Object &mainbody,
                    double addtime,
-                   std::string length)
+                   std::string dimension)
 {
    int i = objectNumber;
    System tempSystem = mysolarsystem_;
@@ -174,7 +179,7 @@ SolveStep::rk4Step(double delta_t,
    tempBody.setVelocity(mainbody.getVelocity() + k1Vel*0.5);
 
    // k2
-   tempSystem.acceleration(tempBody, i, addtime,length);
+   tempSystem.acceleration(tempBody, i, addtime,dimension);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -185,7 +190,7 @@ SolveStep::rk4Step(double delta_t,
    tempBody.setVelocity( mainbody.getVelocity() + k2Vel*0.5);
 
    // k3
-   tempSystem.acceleration(tempBody, i, addtime,length);
+   tempSystem.acceleration(tempBody, i, addtime,dimension);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -197,7 +202,7 @@ SolveStep::rk4Step(double delta_t,
 
 
    // k4
-   tempSystem.acceleration(tempBody, i, addtime,length);
+   tempSystem.acceleration(tempBody, i, addtime,dimension);
 
    dPosdt = tempBody.getVelocity();
    dVeldt = tempBody.getAcceleration();
@@ -210,7 +215,7 @@ SolveStep::rk4Step(double delta_t,
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
-   mysolarsystem_.acceleration(mainbody, i, addtime,length);
+   mysolarsystem_.acceleration(mainbody, i, addtime,dimension);
 
 }
 
@@ -219,7 +224,7 @@ SolveStep::verlet(double delta_t,
                   int objectNumber,
                   Object &mainbody,
                   double addtime,
-                  std::string length)
+                  std::string dimension)
 {
    int i = objectNumber;
 
@@ -229,12 +234,12 @@ SolveStep::verlet(double delta_t,
    tempBody.setPosition(mainbody.getPosition()+mainbody.getVelocity()*delta_t +
                         mainbody.getAcceleration()*delta_t*delta_t*0.5); //pos_i+1
 
-   tempSystem.acceleration(tempBody, i, addtime,length);
+   tempSystem.acceleration(tempBody, i, addtime,dimension);
 
    tempBody.setVelocity(mainbody.getVelocity() + 0.5*
                         (mainbody.getAcceleration()+tempBody.getAcceleration())*delta_t); //vel_i+1
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
-   mysolarsystem_.acceleration(mainbody, i, addtime,length);
+   mysolarsystem_.acceleration(mainbody, i, addtime,dimension);
    }
