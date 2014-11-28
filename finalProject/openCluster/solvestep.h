@@ -26,12 +26,14 @@ class SolveStep
       void rk4Step(double delta_t,
                    int objectNumber,
                    Object &mainbody,
+                   System &newsystem,
                    double addtime,
                    std::string dimension);
 
       void verlet(double delta_t,
                   int objectNumber,
                   Object &mainbody,
+                  System &newsystem,
                   double addtime,
                   std::string dimension);
 

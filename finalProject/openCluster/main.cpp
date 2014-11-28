@@ -127,15 +127,15 @@ int main()
    dimension = "ly";
    RandomGenerator generate;
    double R0 = 20;
-   double epsilon = 0.0;
+   double epsilon = 0.0;//6.0e-4;
    int N = 100;
    System mysystem = generate.randomSystem(N, R0);
    mysystem.setEpsilon(epsilon);
    SolveStep solver(mysystem);
-   double timestep = 49.0;
-   double simulationTime = 399.0;
+   double timestep = 10.0;
+   double simulationTime = 100.0;
    std::string fileName = "solve_";
-   std::string method = "verlet";
+   std::string method = "rk4";
    solver.solve(timestep, simulationTime, fileName, method, dimension);
 
    std::ofstream fout("start.m");

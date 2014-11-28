@@ -89,13 +89,13 @@ System::System()
     arma::Col<double> tempVel = tempObject.getVelocity()-mainVel;
     double V = std::sqrt(arma::dot(tempVel,tempVel));
     double maxTime;
-    if (V>1e-5)
+    if (V>1e-16)
     {
        maxTime = R/V;
     }
     else
     {
-       maxTime = R/1e-5;
+       maxTime = R/1e-16;
     }
     double temptime;
 
@@ -108,8 +108,16 @@ System::System()
           R = d.twoObjects(position1, position2);
           tempVel = tempObject.getVelocity()-mainVel;
           V = std::sqrt(arma::dot(tempVel,tempVel));
+          if (V>1e-16)
+          {
+             maxTime = R/V;
+          }
+          else
+          {
+             maxTime = R/1e-16;
+          }
           temptime = R/V;
-          if (temptime<maxTime && V<1e-5)
+          if (temptime<maxTime)
           {
              maxTime = temptime;
           }
@@ -149,8 +157,8 @@ System::System()
              const Object otherObject  = objectlist[j];
              const double R = d.twoObjects(movingObject.getPosition(),
                                            otherObject.getPosition());
-             energy +=  4 * PI * PI * otherObject.getMass() *
-                   movingObject.getMass()/R;
+             energy += -( 4 * PI * PI * otherObject.getMass() *
+                   movingObject.getMass()/R);
           }
        }
     }
@@ -200,8 +208,8 @@ System::System()
              if (d.twoObjects(center, position1)<limit)
              {
                 double R = d.twoObjects(position1, position2);
-                energy +=  4 * PI * PI * otherObject.getMass() *
-                      movingObject.getMass() /R;
+                energy += -( 4 * PI * PI * otherObject.getMass() *
+                      movingObject.getMass() /R);
              }
           }
        }
