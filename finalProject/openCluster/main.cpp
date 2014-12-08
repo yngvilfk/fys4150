@@ -17,43 +17,43 @@ int main()
     * while generating plots and time for this part*/
 //-------------------------------------------------------------
    //initialize sun
-//   std::string nameSun = "sun";
-//   arma::Col<double> positionSun(3), velocitySun(3);
-//   double massSun = 1.0; //SolarMass
-//   positionSun.zeros();
-//   velocitySun.zeros();
+   std::string nameSun = "sun";
+   arma::Col<double> positionSun(3), velocitySun(3);
+   double massSun = 1.0; //SolarMass
+   positionSun.zeros();
+   velocitySun.zeros();
 
-//   //initialize earth
-//   std::string nameEarth = "earth";
-//   arma::Col<double> positionEarth(3), velocityEarth(3);
-//   double massEarth = 3e-6; //solarmass
-//   positionEarth.zeros();
-//   velocityEarth.zeros();
+   //initialize earth
+   std::string nameEarth = "earth";
+   arma::Col<double> positionEarth(3), velocityEarth(3);
+   double massEarth = 3e-6; //solarmass
+   positionEarth.zeros();
+   velocityEarth.zeros();
 
-//   //declare solar system
-//   System solarsystem;
+   //declare solar system
+   System solarsystem;
 
-//   positionEarth(0) = 1.0;
-//   velocityEarth(1) = -2*PI;
+   positionEarth(0) = 1.0;
+   velocityEarth(1) = -2*PI;
 
 
-//   //Declaration of objects
-//   Object earth(positionEarth,velocityEarth, massEarth, nameEarth);
-//   Object sun(positionSun, velocitySun, massSun, nameSun);
+   //Declaration of objects
+   Object earth(positionEarth,velocityEarth, massEarth, nameEarth);
+   Object sun(positionSun, velocitySun, massSun, nameSun);
 
-//   //add objects to system
-//   solarsystem.addObject(sun);
-//   solarsystem.addObject(earth);
+   //add objects to system
+   solarsystem.addObject(sun);
+   solarsystem.addObject(earth);
 
-//   std::string nameAdd = "rk4";
-//   earth.newFile(nameAdd);
-//   sun.newFile(nameAdd);
-//   SolveStep solver(solarsystem);
+   std::string nameAdd = "rk4";
+   earth.newFile(nameAdd);
+   sun.newFile(nameAdd);
+   SolveStep solver(solarsystem);
 
-//   solver.solve(0.01,0.05,"rk4_","rk4", dimension);
+   solver.solve(0.01,0.05,"rk4_","rk4", dimension);
 
-//   earth.closeFile(nameAdd);
-//   sun.closeFile(nameAdd);
+   earth.closeFile(nameAdd);
+   sun.closeFile(nameAdd);
 
 //-------------------------------------------------------------
    /* problem b)
@@ -61,65 +61,66 @@ int main()
     * while generating plots for this part*/
 //-------------------------------------------------------------
 
-//   //reset sun
-//   positionSun.zeros();
-//   velocitySun.zeros();
-//   earth.setPosition(positionSun);
-//   earth.setVelocity(velocitySun);
+   //reset sun
+   positionSun.zeros();
+   velocitySun.zeros();
+   earth.setPosition(positionSun);
+   earth.setVelocity(velocitySun);
 
-//   //reset earth
-//   positionEarth.zeros();
-//   velocityEarth.zeros();
-//   positionEarth(0) = 1.0;
-//   velocityEarth(1) = -2*PI;
-//   earth.setPosition(positionEarth);
-//   earth.setVelocity(velocityEarth);
+   //reset earth
+   positionEarth.zeros();
+   velocityEarth.zeros();
+   positionEarth(0) = 1.0;
+   velocityEarth(1) = -2*PI;
+   earth.setPosition(positionEarth);
+   earth.setVelocity(velocityEarth);
 
-//   //initialize moon
-//   std::string nameMoon = "moon";
-//   arma::Col<double> positionMoon(3), velocityMoon(3);
-//   double massMoon = 3e-6*0.0123; //solarmass
-//   positionMoon.zeros();
-//   velocityMoon.zeros();
+   //initialize moon
+   std::string nameMoon = "moon";
+   arma::Col<double> positionMoon(3), velocityMoon(3);
+   double massMoon = 3e-6*0.0123; //solarmass
+   positionMoon.zeros();
+   velocityMoon.zeros();
 
-////   positionMoon(0) = 1.0;
-////   positionMoon(1) = -0.00257;
-////   velocityMoon(1) = -2*PI;
-////   velocityMoon(0) = 0.1668*PI;
 //   positionMoon(0) = 1.0;
-//   positionMoon(1) = -2e-3;
+//   positionMoon(1) = -0.00257;
 //   velocityMoon(1) = -2*PI;
-//   velocityMoon(2) = 0.21544;
-//   Object moon(positionMoon, velocityMoon, massMoon, nameMoon);
+//   velocityMoon(0) = 0.1668*PI;
+   positionMoon(0) = 1.0;
+   positionMoon(1) = -2e-3;
+   velocityMoon(1) = -2*PI;
+   velocityMoon(2) = 0.21544;
+   Object moon(positionMoon, velocityMoon, massMoon, nameMoon);
 
-//   //declare solar system
-//   System solarsystemAdapt;
+   //declare solar system
+   System solarsystemAdapt;
 
-//   //add objects to system
-//   solarsystemAdapt.addObject(sun);
-//   solarsystemAdapt.addObject(earth);
-//   solarsystemAdapt.addObject(moon);
+   //add objects to system
+   solarsystemAdapt.addObject(sun);
+   solarsystemAdapt.addObject(earth);
+   solarsystemAdapt.addObject(moon);
 
-//   std::string nameAdd = "verletAdapt_";
-//   earth.newFile(nameAdd);
-//   sun.newFile(nameAdd);
-//   moon.newFile(nameAdd);
-//   SolveStep solverAdapt(solarsystemAdapt);
+   std::string nameAdd = "verletAdapt_";
+   earth.newFile(nameAdd);
+   sun.newFile(nameAdd);
+   moon.newFile(nameAdd);
+   SolveStep solverAdapt(solarsystemAdapt);
 
-//   double timestep = 1.0;
+   double timestep = 1.0;
 
-//   start = clock(); //start timer
-//   solverAdapt.solve(timestep,4.0,nameAdd,"verlet", dimension);
-//   finish = clock(); //stop timer
-//   std::cout << "Simulation time: " <<
-//                static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+   start = clock(); //start timer
+   solverAdapt.solve(timestep,4.0,nameAdd,"verlet", dimension);
+   finish = clock(); //stop timer
+   std::cout << "Simulation time: " <<
+                static_cast<double>(finish - start)/
+                static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
 
-//   earth.closeFile(nameAdd);
-//   sun.closeFile(nameAdd);
-//   moon.closeFile(nameAdd);
+   earth.closeFile(nameAdd);
+   sun.closeFile(nameAdd);
+   moon.closeFile(nameAdd);
 
    //-------------------------------------------------------------
-      /* problem c)
+      /* problem c)-->
        * creation of a simple model of an open cluster. The lines
        * in Solvestep that saves every position for every particle
        * is commented out during these calculations. */
@@ -127,28 +128,32 @@ int main()
    dimension = "ly";
    RandomGenerator generate;
    double R0 = 20;
-   double epsilon = 0.0;//6.0e-4;
-   int N = 100;
+   double epsilon = 1.5*7.3e-11;//7.3e-8;
+   int N = 500;
    System mysystem = generate.randomSystem(N, R0);
    mysystem.setEpsilon(epsilon);
    SolveStep solver(mysystem);
-   double timestep = 10.0;
-   double simulationTime = 100.0;
+   double timestep = 0.1;
+   double simulationTime = 10.0;
    std::string fileName = "solve_";
    std::string method = "rk4";
+
+
    solver.solve(timestep, simulationTime, fileName, method, dimension);
 
    std::ofstream fout("start.m");
    fout << "A = [";
+   double mass = 0.0;
    for (int i = 0 ; i < mysystem.numberOfObject ; ++i)
    {
       Object &mainbody = mysystem.objectlist[i];
 
       fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
            << "\t\t" << mainbody.getPosition()(2) << "\n";
+      mass += mainbody.getMass();
    }
    fout << "] \n";
    fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
    fout.close();
-
+   std::cout <<"average mass:"<< mass/static_cast<double>(N) << std::endl;
 }

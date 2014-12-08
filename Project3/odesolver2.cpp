@@ -19,7 +19,8 @@ OdeSolver2::rk4(double time,
                 int nSteps,
                 std::string filename)
 {
-   arma::Col<double> k1x(2), k2x(2), k3x(2), k4x(2), k1y(2), k2y(2), k3y(2), k4y(2);
+   arma::Col<double> k1x(2), k2x(2), k3x(2),
+         k4x(2), k1y(2), k2y(2), k3y(2), k4y(2);
    n = nSteps;
    delta_t = time/(n+1);
 
@@ -184,10 +185,14 @@ OdeSolver2::rk4(double time,
             k4y(0) = dydt*delta_t;
             k4y(1) = dvydt*delta_t;
 
-            tempBody.position(0) = mainbody.position(0) + 1.0/6.0 * (k1x(0) + 2.*k2x(0) + 2.*k3x(0) + k4x(0));
-            tempBody.velocity(0) = mainbody.velocity(0) + 1.0/6.0 * (k1x(1) + 2.*k2x(1) + 2.*k3x(1) + k4x(1));
-            tempBody.position(1) = mainbody.position(1) + 1.0/6.0 * (k1y(0) + 2.*k2y(0) + 2.*k3y(0) + k4y(0));
-            tempBody.velocity(1) = mainbody.velocity(1) + 1.0/6.0 * (k1y(1) + 2.*k2y(1) + 2.*k3y(1) + k4y(1));
+            tempBody.position(0) = mainbody.position(0) + 1.0/6.0 *
+                  (k1x(0) + 2.*k2x(0) + 2.*k3x(0) + k4x(0));
+            tempBody.velocity(0) = mainbody.velocity(0) + 1.0/6.0 *
+                  (k1x(1) + 2.*k2x(1) + 2.*k3x(1) + k4x(1));
+            tempBody.position(1) = mainbody.position(1) + 1.0/6.0 *
+                  (k1y(0) + 2.*k2y(0) + 2.*k3y(0) + k4y(0));
+            tempBody.velocity(1) = mainbody.velocity(1) + 1.0/6.0 *
+                  (k1y(1) + 2.*k2y(1) + 2.*k3y(1) + k4y(1));
 
 
 
@@ -212,7 +217,9 @@ OdeSolver2::rk4(double time,
 
 
 
-            fout <<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t" << k*delta_t << "\t\t" << kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
+            fout <<"\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1)
+                << "\t\t" << k*delta_t << "\t\t" << kineticEnergi << "\t\t"
+                << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
             if (i == mysolarsystem.numberOfObject-1)
             {
                fout << "\n";
@@ -307,8 +314,10 @@ OdeSolver2::verlet(double time,
 
           } //end for
 
-      tempBody.position(0) = mainbody.position(0)+mainbody.velocity(0)*delta_t +force(0)*delta_t*delta_t*0.5; //x_i+1
-      tempBody.position(1) = mainbody.position(1)+mainbody.velocity(1)*delta_t +force(1)*delta_t*delta_t*0.5; //y_i+1
+      tempBody.position(0) = mainbody.position(0)+mainbody.velocity(0)*
+            delta_t +force(0)*delta_t*delta_t*0.5; //x_i+1
+      tempBody.position(1) = mainbody.position(1)+mainbody.velocity(1)*
+            delta_t +force(1)*delta_t*delta_t*0.5; //y_i+1
 
       arma::Col<double> newforce(2);
       newforce.zeros();
@@ -327,8 +336,10 @@ OdeSolver2::verlet(double time,
 
       } //end for
 
-      tempBody.velocity(0) = mainbody.velocity(0) + 0.5*(force(0)+newforce(0))*delta_t; //vx_i+1
-      tempBody.velocity(1) = mainbody.velocity(1) + 0.5*(force(1)+newforce(1))*delta_t; //vy_i+1
+      tempBody.velocity(0) = mainbody.velocity(0) +
+            0.5*(force(0)+newforce(0))*delta_t; //vx_i+1
+      tempBody.velocity(1) = mainbody.velocity(1) +
+            0.5*(force(1)+newforce(1))*delta_t; //vy_i+1
 
       double kineticEnergi = mysolarsystem.kineticEnergi(mainbody);
       double potentialEnergy = 0.0;
@@ -346,7 +357,9 @@ OdeSolver2::verlet(double time,
 
       } //end for
 
-      fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t" << tempBody.position(1) << "\t\t"<< kineticEnergi << "\t\t" << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
+      fout << k*delta_t << "\t\t" << tempBody.position(0) << "\t\t"
+           << tempBody.position(1) << "\t\t"<< kineticEnergi << "\t\t"
+           << potentialEnergy << "\t\t" << angularMomentum << "\t\t";
       if (i == mysolarsystem.numberOfObject)
       {
          fout << "\n";

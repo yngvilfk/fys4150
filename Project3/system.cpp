@@ -29,15 +29,18 @@ System::force(Object &object1,
     //pos1: position object 1, pos 2: position object 2,
     Distance d;
     double R = d.twoObjects(object1.position, object2.position);
-    F(0) = -4*PI*PI*object2.mass*(object1.position(0)-object2.position(0))/(R*R*R);
-    F(1) = -4*PI*PI*object2.mass*(object1.position(1)-object2.position(1))/(R*R*R);
+    F(0) = -4*PI*PI*object2.mass*(object1.position(0)-
+                                  object2.position(0))/(R*R*R);
+    F(1) = -4*PI*PI*object2.mass*(object1.position(1)-
+                                  object2.position(1))/(R*R*R);
 }
 
 
 double
 System::kineticEnergi(Object movingObject)
 {
-   double energy = 0.5 * movingObject.mass *arma::dot(movingObject.velocity, movingObject.velocity) ; //* solarmass * velocitySI * velocitySI ;
+   double energy = 0.5 * movingObject.mass *
+         arma::dot(movingObject.velocity, movingObject.velocity) ;
    return energy;
 }
 
@@ -48,7 +51,7 @@ System::potentialEnergy(Object movingObject,
 {
    Distance d;
    double R = d.twoObjects(movingObject.position, otherObject.position);
-   double energy =  4 * PI * PI * otherObject.mass * movingObject.mass /R;//* solarmass  * velocitySI * velocitySI/ ( AU);
+   double energy =  4 * PI * PI * otherObject.mass * movingObject.mass /R;
    return energy;
 }
 
@@ -56,6 +59,7 @@ System::potentialEnergy(Object movingObject,
 double
 System::angularMomentum(Object movingObject)
 {
-   double momentum = (movingObject.position(0)*movingObject.velocity(1)-movingObject.position(1)*movingObject.velocity(0));// * AU * velocitySI;
+   double momentum = (movingObject.position(0)*movingObject.velocity(1)-
+                      movingObject.position(1)*movingObject.velocity(0));
    return momentum;
 }

@@ -16,7 +16,11 @@ OdeSolver::OdeSolver(double x_0,
     PI = 4*std::atan(1.0);
 }
 
-OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y, int timesteps)
+OdeSolver::OdeSolver(double x_0,
+                     double y_0,
+                     double v0_x,
+                     double v0_y,
+                     int timesteps)
    : x0(x_0)
    , y0(y_0)
    , v0x(v0_x)
@@ -26,7 +30,10 @@ OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y, int times
    delta_t = 0.0001;
 }
 
-OdeSolver::OdeSolver(double x_0, double y_0, double v0_x, double v0_y)
+OdeSolver::OdeSolver(double x_0,
+                     double y_0,
+                     double v0_x,
+                     double v0_y)
    : x0(x_0)
    , y0(y_0)
    , v0x(v0_x)
@@ -57,19 +64,24 @@ OdeSolver::~OdeSolver()
 
 
 void
-OdeSolver::derivatives(double& R, arma::Col<double>& in,arma::Col<double>& out)
+OdeSolver::derivatives(double& R,
+                       arma::Col<double>& in,
+                       arma::Col<double>& out)
 {
    out(0) = in(1); // out(0) = dx/dt = v_x or dy/dt = v_y
    out(1) = -4*PI*PI*in(0)/(R*R*R);
 }
 
 void
-OdeSolver::rk4_step(double R, arma::Col<double>& yin, arma::Col<double>& yout)
+OdeSolver::rk4_step(double R, arma::Col<double>& yin,
+                    arma::Col<double>& yout)
 {
    /*
     R    - holds the distance between two objects
-    yin  - a two dimension array who holds the value of: yin(0)=x, yin(1)=dx/dt = v_x at time t
-    yout - a two dimension array who holds the value of: yin(0)=x, yin(1)=dx/dt = v_x at time t+delta_t
+    yin  - a two dimension array who holds the value of:
+           yin(0)=x, yin(1)=dx/dt = v_x at time t
+    yout - a two dimension array who holds the value of:
+           yin(0)=x, yin(1)=dx/dt = v_x at time t+delta_t
     */
    arma::Col<double> k1(2), k2(2), k3(2), k4(2), y_k(2);
    //Callculation of k1
@@ -131,7 +143,8 @@ OdeSolver::rk4()
       double R = d.twoObjects(earth,sun);
       OdeSolver::rk4_step(R, x, xout);
       OdeSolver::rk4_step(R, y, yout);
-      fout << i*delta_t << "\t\t" << xout(0) << "\t\t" << xout(1) << "\t\t" << yout(0) << "\t\t" << yout(1) << "\n";
+      fout << i*delta_t << "\t\t" << xout(0) << "\t\t" << xout(1)
+           << "\t\t" << yout(0) << "\t\t" << yout(1) << "\n";
       t_h += delta_t;
       y(0) = yout(0);
       y(1) = yout(1);

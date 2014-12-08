@@ -15,39 +15,64 @@ SolveStep::solve(double timestep,
                  std::string method,
                  std::string dimension)
 {
+   /* Solves given system with given parametres using
+    * given method
+    * timestep: size of timestep
+    * time: total simulation time
+    * name: name of files where the position of the
+    *       particles are saved at some timesteps
+    * method: verlet or RK4
+    * dimension: ly or AU
+    *
+    * Ditterent timers have not been used at the
+    * same time.*/
 
-//   clock_t start, finish;
-//   omp_set_num_threads(1);
+   clock_t start, finish;
+   Distance d;
+
+   //declaration and intialisation
+   omp_set_num_threads(8); //parallelisation
+   double limit = 60; //definition of bound system
+   arma::Col<double> center(3), position(3);
+   center.zeros();
+   double t = 0.;
    System newsystem = mysolarsystem_;
    int n = time/timestep;
-   double minTime = timestep;
-   double limit = 200;
-   Distance d;
+
+   //file to store energy of the system
+   std::ofstream energy("energy.m");
+   energy << "A = [";
+   //file to store energy of the bound system
+   std::ofstream bound("BoundEnergy.m");
+   bound << "A = [";
+
+
+   //update the objects initial acceleration
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = newsystem.objectlist[i];
       newsystem.acceleration(mainbody, i, 0.0,dimension);
-
    }
-   arma::Col<double> center(3), position(3);
-   center.zeros();
-   std::ofstream bound("BoundEnergy.m");
-   bound << "A = [";
-   double t = 0.;
-   std::ofstream energy("energy.m");
-   energy << "A = [";
+
+//   start = clock(); //start timer
+
+   //start simulation
    for (int k = 0 ; k < n ; ++k)
    {
       t += timestep;
+
+      //file to store position of particles
       name.append("t");
       std::string filename = name;
       filename.append(".m");
       std::ofstream fout(filename.c_str());
       fout << "t = " << t << "\n A = [";
-      std::cout << "t = " << t << std::endl;
 
+      //variable needed for calculating intermediate steps
       double addtime = 0.0;
-//#pragma omp parallel for private(i)
+
+      //simulate all particles for one timestep
+#pragma omp parallel for private(i)
       for (int i = 0 ; i < size() ; ++i)
       {
          Object &mainbody = newsystem.objectlist[i];
@@ -57,6 +82,7 @@ SolveStep::solve(double timestep,
 
          double maxTimestep;
 
+         //chose the smallest timestep
          if (mainbody.maxTimestep() < tempSystem.maxTimestep(i))
          {
             maxTimestep = mainbody.maxTimestep();
@@ -66,8 +92,7 @@ SolveStep::solve(double timestep,
             maxTimestep = tempSystem.maxTimestep(i);
          }
 
-
-         std::cout << maxTimestep << std::endl;
+         //make sure to use small endough timesteps
          while(dt > maxTimestep)
          {
                dt = dt/2.0;
@@ -75,26 +100,28 @@ SolveStep::solve(double timestep,
                j += 1;
          }
 
-
+         //simulate timesteps
          for (int kk = 0 ; kk < std::pow(2,j); ++kk)
          {
             if (method == "rk4")
             {
-//               start = clock(); //start timer
+               start = clock(); //start timer
                rk4Step(dt, i, mainbody, tempSystem, addtime, dimension);
-//               finish = clock(); //stop timer
-//               std::cout << "time one rk4 step: " <<
-//                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+               finish = clock(); //stop timer
+               std::cout << "time one rk4 step: " <<
+                            static_cast<double>(finish - start)/
+                            static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
 //               mainbody.addToFile(name);
                addtime += dt;
             }
             else if(method == "verlet")
             {
-//               start = clock(); //start timer
+               start = clock(); //start timer
                verlet(dt, i, mainbody, tempSystem, addtime, dimension);
-//               finish = clock(); //stop timer
-//               std::cout << "time one verlet step: " <<
-//                            static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+               finish = clock(); //stop timer
+               std::cout << "time one verlet step: " <<
+                            static_cast<double>(finish - start)/
+                            static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
 //               mainbody.addToFile(name);
                addtime += dt;
             }
@@ -103,16 +130,11 @@ SolveStep::solve(double timestep,
                std::cout << "method must be 'verlet' or 'rk4'" << std::endl;
             }
 
-            if(dt < minTime)
-            {
-               minTime = dt;
-            }
-         }
-
       }
 
       mysolarsystem_ = newsystem;
 
+      //save position to file
       for (int i = 0 ; i < size() ; ++i)
       {
          Object &mainbody = mysolarsystem_.objectlist[i];
@@ -123,34 +145,60 @@ SolveStep::solve(double timestep,
             fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
                  << "\t\t" << mainbody.getPosition()(2) << "\n";
          }
-         else
-         {
-            mysolarsystem_.removeObject(i);
-            i-=1;
-         }
+//         else
+//         {
+//            mysolarsystem_.removeObject(i);
+//            i-=1;
+//         }
       }
       fout << "]; \n";
-      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')";
+      fout << "plot3(A(:,1), A(:,2),A(:,3), 'o')\n";
+      fout << "t = " << t ;
       fout.close();
+      }
 
-      bound << t << "\t\t" << mysolarsystem_.boundPotentialEnergy(limit) << "\t\t" << mysolarsystem_.boundKineticEnergi(limit) << "\n";
+         //write energy of the system to file
+         bound << t << "\t\t" << mysolarsystem_.boundPotentialEnergy(limit) << "\t\t"
+               << mysolarsystem_.boundKineticEnergi(limit) << "\n";
 
-      energy << t << "\t\t" << mysolarsystem_.totalEnergy() << "\n";
+         energy << t << "\t\t" <<  mysolarsystem_.potentialEnergy() << "\t\t"
+                << mysolarsystem_.kineticEnergi() << "\n";
+         if (k % 100 == 0)
+         {
+            std::cout << t << std::endl;
+         }
 
    }
+//   finish = clock(); //stop timer
+//   std::cout << "time: " <<
+//                static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+
+
    energy << "]; \n";
-//   energy << "plot(A(:,1), A(:,2))";
    energy.close();
 
    bound << "]; \n";
-//   bound << "plot(A(:,1), A(:,2))";
    bound.close();
    for (int i = 0 ; i < size() ; ++i)
    {
       Object &mainbody = mysolarsystem_.objectlist[i];
       mysolarsystem_.acceleration(mainbody, i, 0.0,dimension);
    }
-   std::cout << mysolarsystem_.numberOfObject <<" or: "<< size() << std::endl;
+
+
+   //write final postition to file
+   std::ofstream fout("end.m");
+   fout << "A = [";
+   for (int i = 0 ; i < size() ; ++i)
+   {
+      Object &mainbody = mysolarsystem_.objectlist[i];
+
+      fout << mainbody.getPosition()(0) << "\t\t" << mainbody.getPosition()(1)
+           << "\t\t" << mainbody.getPosition()(2) << "\n";
+   }
+   fout << "] \n";
+   fout.close();
+
    return 0;
 }
 

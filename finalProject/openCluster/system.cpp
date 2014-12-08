@@ -44,21 +44,24 @@ System::System()
           position1 = mainObject.getPosition();
           position2 = tempObject.getPosition()+ time*tempObject.getVelocity();
           double R = d.twoObjects(position1, position2);
-          tempAcceleration = -4*PI*PI*tempObject.getMass()*(mainObject.getPosition()-tempObject.getPosition())/
-                               (R*(R*R+epsilon_*epsilon_));// ly/yr]
+
           if (dimension == "ly")
           {
-             acceleration += tempAcceleration/6.3241e4;
+             tempAcceleration = -(tempObject.getMass()*
+                                  (mainObject.getPosition()-tempObject.getPosition())/
+                                  (R*(R*R+epsilon_*epsilon_)));// ly/yr]
           }
           else if(dimension == "AU")
           {
-             acceleration += tempAcceleration;
+             tempAcceleration = -4*PI*PI*tempObject.getMass()*
+                   (mainObject.getPosition()-tempObject.getPosition())/
+                   (R*(R*R+epsilon_*epsilon_));// ly/yr]
           }
           else
           {
              std::cout << "dimension must be AU or ly"<< std::endl;
           }
-
+          acceleration += tempAcceleration;
        } //end if
     } //end for
     mainObject.setAcceleration(acceleration);
@@ -83,7 +86,7 @@ System::System()
     arma::Col<double> mainVel = mainObject.getVelocity();
 
     position1 = mainObject.getPosition();
-    position2 = tempObject.getPosition();//+ time*tempObject.getVelocity();
+    position2 = tempObject.getPosition();
 
     double R = d.twoObjects(position1, position2);
     arma::Col<double> tempVel = tempObject.getVelocity()-mainVel;
@@ -104,7 +107,7 @@ System::System()
        if (j!=i)
        {
           tempObject = objectlist[j];
-          position2 = tempObject.getPosition();//+ time*tempObject.getVelocity();
+          position2 = tempObject.getPosition();
           R = d.twoObjects(position1, position2);
           tempVel = tempObject.getVelocity()-mainVel;
           V = std::sqrt(arma::dot(tempVel,tempVel));
@@ -135,7 +138,8 @@ System::System()
     {
        const Object movingObject = objectlist[i];
        energy += 0.5 * movingObject.getMass() *
-             arma::dot(movingObject.getVelocity(), movingObject.getVelocity()) ; //* solarmass * velocity * velocity ;
+             arma::dot(movingObject.getVelocity(),
+                       movingObject.getVelocity()) ;
     }
 
     return energy;
@@ -181,7 +185,8 @@ System::System()
        if (d.twoObjects(center, position)<limit)
        {
           energy += 0.5 * movingObject.getMass() *
-                arma::dot(movingObject.getVelocity(), movingObject.getVelocity()) ; //* solarmass * velocity * velocity ;
+                arma::dot(movingObject.getVelocity(),
+                          movingObject.getVelocity()) ;
        }
     }
 
