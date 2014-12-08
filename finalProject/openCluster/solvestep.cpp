@@ -171,7 +171,8 @@ SolveStep::solve(double timestep,
    }
 //   finish = clock(); //stop timer
 //   std::cout << "time: " <<
-//                static_cast<double>(finish - start)/static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
+//                static_cast<double>(finish - start)/
+//                static_cast<double>(CLOCKS_PER_SEC ) << " s" << std::endl;
 
 
    energy << "]; \n";
@@ -213,7 +214,8 @@ SolveStep::rk4Step(double delta_t,
    int i = objectNumber;
    System tempSystem = newSystem;
    Object &tempBody = tempSystem.objectlist[i];
-   arma::Col<double> k1Pos(3), k1Vel(3), k2Pos(3), k2Vel(3), k3Pos(3), k3Vel(3), k4Pos(3), k4Vel(3);
+   arma::Col<double> k1Pos(3), k1Vel(3), k2Pos(3), k2Vel(3),
+           k3Pos(3), k3Vel(3), k4Pos(3), k4Vel(3);
 
    // Calculate k1
 
@@ -259,8 +261,10 @@ SolveStep::rk4Step(double delta_t,
    k4Pos = dPosdt*delta_t;
    k4Vel = dVeldt*delta_t;
 
-   tempBody.setPosition( mainbody.getPosition() + 1.0/6.0 * (k1Pos + 2.*k2Pos + 2.*k3Pos + k4Pos));
-   tempBody.setVelocity( mainbody.getVelocity() + 1.0/6.0 * (k1Vel + 2.*k2Vel + 2.*k3Vel + k4Vel));
+   tempBody.setPosition( mainbody.getPosition() +
+                         1.0/6.0 * (k1Pos + 2.*k2Pos + 2.*k3Pos + k4Pos));
+   tempBody.setVelocity( mainbody.getVelocity() +
+                         1.0/6.0 * (k1Vel + 2.*k2Vel + 2.*k3Vel + k4Vel));
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
@@ -287,7 +291,8 @@ SolveStep::verlet(double delta_t,
    tempSystem.acceleration(tempBody, i, addtime,dimension);
 
    tempBody.setVelocity(mainbody.getVelocity() + 0.5*
-                        (mainbody.getAcceleration()+tempBody.getAcceleration())*delta_t); //vel_i+1
+                        (mainbody.getAcceleration()+
+                         tempBody.getAcceleration())*delta_t); //vel_i+1
 
    mainbody.setPosition(tempBody.getPosition());
    mainbody.setVelocity(tempBody.getVelocity());
